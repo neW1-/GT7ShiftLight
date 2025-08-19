@@ -1,17 +1,17 @@
-# GT7 Hue Shift Light
+# GT7 Shift Light for Home Assistant
 
-A real-time shift light system for Gran Turismo 7 that controls Philips Hue lights via Home Assistant. When you hit the rev limiter in GT7, your Hue light flashes bright red - just like a professional race car!
+A real-time shift light system for Gran Turismo 7 that controls any Home Assistant light. When you hit the rev limiter in GT7, your light flashes bright red - just like a professional race car!
 
 ![GT7 Shift Light Demo](https://img.shields.io/badge/Status-Working-brightgreen)
 ![Python](https://img.shields.io/badge/Python-3.7+-blue)
 ![GT7](https://img.shields.io/badge/Gran%20Turismo-7-red)
-![Hue](https://img.shields.io/badge/Philips-Hue-orange)
+![Home Assistant](https://img.shields.io/badge/Home-Assistant-blue)
 
 ## ✨ Features
 
 - **Real-time telemetry**: Uses GT7's UDP telemetry data at 60Hz
 - **GT7 rev limiter detection**: Automatically triggers on GT7's built-in rev limiter
-- **Bright red shift light**: Flashes your Hue light bright red when it's time to shift
+- **Bright red shift light**: Flashes any Home Assistant light bright red when it's time to shift
 - **Automatic car detection**: Works with any car's specific rev limit
 - **Low CPU usage**: Efficient boolean-based detection
 - **Easy setup**: Simple YAML configuration
@@ -20,14 +20,14 @@ A real-time shift light system for Gran Turismo 7 that controls Philips Hue ligh
 
 1. **GT7 Telemetry**: Receives real-time telemetry data from Gran Turismo 7 via UDP
 2. **Rev Limiter Detection**: Monitors GT7's built-in `rev_limit` flag
-3. **Hue Light Control**: Sends commands to your Hue light via Home Assistant REST API
+3. **Light Control**: Sends commands to your Home Assistant light via REST API
 4. **Instant Response**: Light turns red when you hit the rev limiter, off when you shift
 
 ## 🛠️ Hardware Requirements
 
 - **PlayStation 5** with Gran Turismo 7
 - **Home Assistant** server (Raspberry Pi, NUC, etc.)
-- **Philips Hue Bridge** and compatible light
+- **Any Home Assistant-compatible light** (Hue, LIFX, smart switches, etc.)
 - **Network connection** between all devices
 
 ## 🏁 Quick Start
@@ -43,10 +43,10 @@ pip install gt-telem requests pyyaml
 1. Enable telemetry in GT7: Settings → Network → Enable telemetry
 
 **Home Assistant Setup:**
-1. Set up Philips Hue integration
+1. Set up your preferred light integration (Hue, LIFX, etc.)
 2. Create a Long-Lived Access Token:
    - Profile → Long-Lived Access Tokens → Create Token
-3. Note your light's entity ID (e.g., `light.hue_iris_1`)
+3. Note your light's entity ID (e.g., `light.hue_iris_1`, `light.living_room_lamp`)
 
 ### 2. Configuration
 
@@ -224,7 +224,6 @@ The script uses the `gt-telem` library to receive UDP telemetry from GT7 at 60Hz
 ## 🤝 Contributing
 
 Contributions welcome! Areas for improvement:
-- Support for other smart lights (LIFX, Govee, etc.)
 - Mobile app for configuration
 - Multiple shift points based on optimal shift RPM
 - Integration with other racing games
