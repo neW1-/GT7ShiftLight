@@ -1,0 +1,16 @@
+# GT7 Hue Shift Light Configuration
+# Copy this file to config.yaml and fill in your details
+
+# Home Assistant Configuration
+ha_token: "YOUR_LONG_LIVED_ACCESS_TOKEN_HERE"
+ha_url: "http://YOUR_HOME_ASSISTANT_IP:8123"
+hue_light_entity: "light.your_hue_light_entity"
+
+# PlayStation 5 Configuration  
+ps5_ip: "YOUR_PS5_IP_ADDRESS"
+
+# Example values:
+# ha_token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiI1NmQ5Y2UyYWMxZGQ0YzE3OGRhYTY3MDJhZTI1YjU0YyIsImlhdCI6MTc1NTU5NjM1OSwiZXhwIjoyMDcwOTU2MzU5fQ.mgjaF4yWKcn0q3Bg0xs7Ng9jCHYnT7IB-UmbMswEnPU"
+# ha_url: "http://192.168.1.100:8123"
+# hue_light_entity: "light.hue_iris_1"
+# ps5_ip: "192.168.1.150"

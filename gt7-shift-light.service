@@ -1,0 +1,24 @@
+[Unit]
+Description=GT7 Hue Shift Light
+After=network.target
+Wants=network.target
+
+[Service]
+Type=simple
+User=pi
+Group=pi
+WorkingDirectory=/home/pi/gt7-shift-light
+ExecStart=/usr/bin/python3 hueflash.py
+Restart=always
+RestartSec=10
+
+# Optional: Resource limits
+MemoryLimit=128M
+CPUQuota=10%
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
