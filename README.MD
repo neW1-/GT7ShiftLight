@@ -24,6 +24,15 @@ A comprehensive lighting system for Gran Turismo 7 that not only provides shift 
 - **Configurable timeout**: Customizable delay before restoring lights
 - **Combined functionality**: Includes shift light + room automation in one script
 
+### TUI Racing Dashboard (`drivetui.py`) 🆕
+- **Real-time visual dashboard**: Terminal-based racing display with progress bars
+- **Live telemetry bars**: RPM, Speed, and Fuel level with visual indicators
+- **Color-coded status**: Green for normal, red for warnings/critical levels
+- **Complete racing info**: Gear, throttle %, brake %, shift light status
+- **Room lighting integration**: All the smart lighting features of `drive.py`
+- **60Hz updates**: Smooth, responsive real-time data visualization
+- **Minimal resource usage**: Lightweight terminal interface
+
 ## 🎯 How It Works
 
 ### Basic Shift Light (`hueflash.py`)
@@ -38,6 +47,13 @@ A comprehensive lighting system for Gran Turismo 7 that not only provides shift 
 3. **Pause Detection**: Uses advanced data analysis to detect when game is paused (telemetry data stops changing)
 4. **Intelligent Restoration**: Waits for configurable timeout (default 0.5s) before restoring lights
 5. **Seamless Integration**: Combines shift light functionality with room automation
+
+### TUI Racing Dashboard (`drivetui.py`) 🆕
+1. **Real-Time Display**: Curses-based terminal interface with live telemetry visualization
+2. **Visual Progress Bars**: RPM, Speed, and Fuel displayed as colored progress bars
+3. **Racing Metrics**: Shows gear, throttle %, brake %, and shift light status
+4. **Smart Status Display**: Color-coded indicators (green=normal, red=critical)
+5. **Complete Integration**: All room lighting features + visual racing dashboard
 
 ## 🛠️ Hardware Requirements
 
@@ -127,19 +143,46 @@ python3 hueflash.py
 python3 drive.py
 ```
 
-You should see:
+#### TUI Racing Dashboard Experience (Ultimate): 🆕
+```bash
+python3 drivetui.py
 ```
-Starting GT7 Drive Mode with Room Lighting
-Configured room lights: ['light.living_room', 'light.hallway']
-Connected to GT7. Waiting for driving activity...
+
+You should see a real-time racing dashboard:
+```
+GT7 Drive Mode TUI - Racing Dashboard
+
+Status: DRIVING MODE ACTIVE
+Shift Light: Ready
+
+RPM: 5500.0 (68.8%)
+[███████████████████████████             ]
+
+Speed (km/h): 125.3 (41.8%)  
+[████████████████                        ]
+
+Fuel: 75.0 (75.0%)
+[██████████████████████████████          ]
+
+Gear: 4
+Throttle: 85.2%
+Brake: 0.0%
 ```
 
 ### 5. Test in GT7
 
 1. Start any race or practice session in GT7
 2. **With `drive.py`**: Watch your room lights automatically turn off when driving starts! 🌑
-3. Rev your engine to the limit - watch your shift light flash bright red! 🔴
-4. **Pause the game**: Room lights will automatically restore after the timeout period ✨
+3. **With `drivetui.py`**: Experience the full racing dashboard with real-time bars and data! 📊
+4. Rev your engine to the limit - watch your shift light flash bright red! 🔴
+5. **Pause the game**: Room lights will automatically restore after the timeout period ✨
+
+The TUI dashboard shows:
+- **RPM Bar**: Green normally, red when approaching rev limit
+- **Speed Bar**: Blue bar showing current speed vs maximum 
+- **Fuel Bar**: Green when full, red when low (placeholder for now)
+- **Live Stats**: Current gear, throttle %, brake %, shift light status
+- **Room Status**: Shows when driving mode is active (lights off)
 
 ## 📋 Configuration Options
 
@@ -147,22 +190,30 @@ Connected to GT7. Waiting for driving activity...
 
 | Setting | Description | Example | Used By |
 |---------|-------------|---------|---------|
-| `ha_token` | Home Assistant Long-Lived Access Token | `"eyJhbGci..."` | Both |
-| `ha_url` | Home Assistant URL with port | `"http://192.168.1.100:8123"` | Both |
-| `hue_light_entity` | Your shift light entity ID | `"light.hue_iris_1"` | Both |
-| `ps5_ip` | Your PlayStation 5 IP address | `"192.168.1.150"` | Both |
-| `room_lights` | List of room lights to control | `["light.living_room", "light.office"]` | drive.py only |
-| `telemetry_timeout` | Seconds before restoring lights when paused | `0.5` | drive.py only |
+| `ha_token` | Home Assistant Long-Lived Access Token | `"eyJhbGci..."` | All |
+| `ha_url` | Home Assistant URL with port | `"http://192.168.1.100:8123"` | All |
+| `hue_light_entity` | Your shift light entity ID | `"light.hue_iris_1"` | All |
+| `ps5_ip` | Your PlayStation 5 IP address | `"192.168.1.150"` | All |
+| `room_lights` | List of room lights to control | `["light.living_room", "light.office"]` | drive.py, drivetui.py |
+| `telemetry_timeout` | Seconds before restoring lights when paused | `0.5` | drive.py, drivetui.py |
 
 ### Room Lighting Behavior 🆕
 
-When using `drive.py`, the system intelligently manages your room lighting:
+When using `drive.py` or `drivetui.py`, the system intelligently manages your room lighting:
 
 1. **Race Start**: Automatically saves current states and turns off all `room_lights`
 2. **Active Driving**: Keeps room lights off, shift light active for rev limiter
 3. **Game Pause Detection**: Monitors for telemetry data that stops changing
 4. **Smart Restoration**: Waits for `telemetry_timeout` seconds, then restores previous room light states
 5. **Resume Racing**: If you resume before timeout, lights stay off and timer is cancelled
+
+### TUI Dashboard Controls 🆕
+
+When using `drivetui.py`:
+- **q/Q**: Quit the dashboard
+- **l/L**: View detailed logs (check `drivetui.log` file)
+- **Auto-refresh**: Updates at 60Hz for smooth real-time data
+- **Color coding**: Green=normal, Red=warning/critical, Blue=info, Yellow=caution
 
 ### Environment Variables (Alternative)
 
@@ -337,6 +388,15 @@ Use `drive.py` for the full experience:
 - Lights restore automatically when you pause or finish
 - Perfect for long racing sessions or competitive events
 
+### Professional Racing Dashboard 🆝
+Use `drivetui.py` for the ultimate racing experience:
+- Real-time visual dashboard with progress bars for all key metrics
+- Color-coded warnings and status indicators
+- Professional racing telemetry display
+- All immersive lighting features included
+- Perfect for streaming, competitive racing, or training sessions
+- Monitor performance metrics in real-time
+
 ## 📄 License
 
 MIT License - Feel free to use and modify!
@@ -350,4 +410,4 @@ MIT License - Feel free to use and modify!
 
 ---
 
-**Ready to race with the ultimate lighting experience? Fire up GT7 and enjoy immersive racing with automatic room lighting and precise shift timing!** 🏁🔴💡
+**Ready to race with the ultimate GT7 experience? From simple shift lights to immersive room automation to professional racing dashboards - choose your setup and dominate the track!** 🏁🔴💡📊
