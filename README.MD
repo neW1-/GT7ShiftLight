@@ -1,6 +1,6 @@
-# GT7 Shift Light for Home Assistant
+# GT7 Shift Light & Room Lighting for Home Assistant
 
-A real-time shift light system for Gran Turismo 7 that controls any Home Assistant light. When you hit the rev limiter in GT7, your light flashes bright red - just like a professional race car!
+A comprehensive lighting system for Gran Turismo 7 that not only provides shift light functionality but also creates an immersive racing environment by automatically controlling your room lighting during races.
 
 ![GT7 Shift Light Demo](https://img.shields.io/badge/Status-Working-brightgreen)
 ![Python](https://img.shields.io/badge/Python-3.7+-blue)
@@ -9,19 +9,35 @@ A real-time shift light system for Gran Turismo 7 that controls any Home Assista
 
 ## ✨ Features
 
+### Shift Light System (`hueflash.py`)
 - **Real-time telemetry**: Uses GT7's UDP telemetry data at 60Hz
 - **GT7 rev limiter detection**: Automatically triggers on GT7's built-in rev limiter
 - **Bright red shift light**: Flashes any Home Assistant light bright red when it's time to shift
 - **Automatic car detection**: Works with any car's specific rev limit
 - **Low CPU usage**: Efficient boolean-based detection
-- **Easy setup**: Simple YAML configuration
+
+### Immersive Room Lighting System (`drive.py`) 🆕
+- **Automatic room lighting control**: Turns off room lights when driving starts
+- **Smart pause detection**: Detects when game is paused (data stops changing) for >1 second
+- **Intelligent restoration**: Restores previous room lighting when game is paused/stopped
+- **Multiple room support**: Control multiple room lights simultaneously
+- **Configurable timeout**: Customizable delay before restoring lights
+- **Combined functionality**: Includes shift light + room automation in one script
 
 ## 🎯 How It Works
 
+### Basic Shift Light (`hueflash.py`)
 1. **GT7 Telemetry**: Receives real-time telemetry data from Gran Turismo 7 via UDP
 2. **Rev Limiter Detection**: Monitors GT7's built-in `rev_limit` flag
 3. **Light Control**: Sends commands to your Home Assistant light via REST API
 4. **Instant Response**: Light turns red when you hit the rev limiter, off when you shift
+
+### Immersive Room Lighting (`drive.py`) 🆕
+1. **Race Detection**: Monitors telemetry to detect when you're actively driving
+2. **Smart Room Control**: Automatically saves current room light states and turns them off
+3. **Pause Detection**: Uses advanced data analysis to detect when game is paused (telemetry data stops changing)
+4. **Intelligent Restoration**: Waits for configurable timeout (default 0.5s) before restoring lights
+5. **Seamless Integration**: Combines shift light functionality with room automation
 
 ## 🛠️ Hardware Requirements
 
@@ -52,6 +68,7 @@ pip install gt-telem requests pyyaml
 
 Create a `config.yaml` file:
 
+#### Basic Shift Light Configuration:
 ```yaml
 # Home Assistant Configuration
 ha_token: "YOUR_LONG_LIVED_ACCESS_TOKEN"
@@ -60,6 +77,29 @@ hue_light_entity: "light.your_hue_light"
 
 # PlayStation 5 Configuration  
 ps5_ip: "YOUR_PS5_IP_ADDRESS"
+```
+
+#### Full Room Lighting Configuration: 🆕
+```yaml
+# Home Assistant Configuration
+ha_token: "YOUR_LONG_LIVED_ACCESS_TOKEN"
+ha_url: "http://YOUR_HA_IP:8123"
+
+# Shift Light Configuration
+hue_light_entity: "light.hue_iris_1"  # Your shift light
+
+# Room Lighting Configuration (NEW)
+room_lights:
+  - "light.living_room"
+  - "light.hallway"
+  - "light.office"
+  # Add as many room lights as you need
+
+# PlayStation 5 Configuration
+ps5_ip: "YOUR_PS5_IP_ADDRESS"
+
+# Telemetry Settings
+telemetry_timeout: 0.5  # Seconds to wait before restoring lights when game pauses
 ```
 
 ### 3. Find Your IP Addresses
@@ -75,34 +115,54 @@ ps5_ip: "YOUR_PS5_IP_ADDRESS"
 - Home Assistant → Developer Tools → States
 - Search for `light.` entities
 
-### 4. Run the Shift Light
+### 4. Run the System
 
+#### Basic Shift Light Only:
 ```bash
 python3 hueflash.py
 ```
 
+#### Full Room Lighting Experience (Recommended): 🆕
+```bash
+python3 drive.py
+```
+
 You should see:
 ```
-Starting GT7 Hue Shift Light (Rev Limit Mode)
-Connected to GT7. Shift light ready!
+Starting GT7 Drive Mode with Room Lighting
+Configured room lights: ['light.living_room', 'light.hallway']
+Connected to GT7. Waiting for driving activity...
 ```
 
 ### 5. Test in GT7
 
 1. Start any race or practice session in GT7
-2. Rev your engine to the limit
-3. Watch your Hue light flash bright red! 🔴
+2. **With `drive.py`**: Watch your room lights automatically turn off when driving starts! 🌑
+3. Rev your engine to the limit - watch your shift light flash bright red! 🔴
+4. **Pause the game**: Room lights will automatically restore after the timeout period ✨
 
 ## 📋 Configuration Options
 
 ### config.yaml Settings
 
-| Setting | Description | Example |
-|---------|-------------|---------|
-| `ha_token` | Home Assistant Long-Lived Access Token | `"eyJhbGci..."`  |
-| `ha_url` | Home Assistant URL with port | `"http://192.168.1.100:8123"` |
-| `hue_light_entity` | Your Hue light's entity ID | `"light.hue_iris_1"` |
-| `ps5_ip` | Your PlayStation 5 IP address | `"192.168.1.150"` |
+| Setting | Description | Example | Used By |
+|---------|-------------|---------|---------|
+| `ha_token` | Home Assistant Long-Lived Access Token | `"eyJhbGci..."` | Both |
+| `ha_url` | Home Assistant URL with port | `"http://192.168.1.100:8123"` | Both |
+| `hue_light_entity` | Your shift light entity ID | `"light.hue_iris_1"` | Both |
+| `ps5_ip` | Your PlayStation 5 IP address | `"192.168.1.150"` | Both |
+| `room_lights` | List of room lights to control | `["light.living_room", "light.office"]` | drive.py only |
+| `telemetry_timeout` | Seconds before restoring lights when paused | `0.5` | drive.py only |
+
+### Room Lighting Behavior 🆕
+
+When using `drive.py`, the system intelligently manages your room lighting:
+
+1. **Race Start**: Automatically saves current states and turns off all `room_lights`
+2. **Active Driving**: Keeps room lights off, shift light active for rev limiter
+3. **Game Pause Detection**: Monitors for telemetry data that stops changing
+4. **Smart Restoration**: Waits for `telemetry_timeout` seconds, then restores previous room light states
+5. **Resume Racing**: If you resume before timeout, lights stay off and timer is cancelled
 
 ### Environment Variables (Alternative)
 
@@ -180,7 +240,8 @@ sudo systemctl start gt7-shift-light
 
 ### Multiple Lights
 
-To control multiple lights, modify the `hue_light_entity` in config.yaml:
+#### Shift Light (`hueflash.py`):
+To control multiple shift lights, modify the `hue_light_entity` in config.yaml:
 ```yaml
 hue_light_entity: 
   - "light.hue_iris_1"
@@ -188,7 +249,26 @@ hue_light_entity:
   - "light.bedroom_light"
 ```
 
-Then update the code to handle multiple entities in the API calls.
+#### Room Lights (`drive.py`) 🆕:
+Room lighting is already designed for multiple lights:
+```yaml
+room_lights:
+  - "light.living_room"
+  - "light.kitchen"  
+  - "light.hallway"
+  - "light.office"
+  - "light.bedroom"
+```
+The system will save individual states and restore each light to its previous setting.
+
+### Custom Timeout
+
+Adjust how quickly room lights restore when game is paused:
+```yaml
+telemetry_timeout: 1.0   # Wait 1 second (good for frequent pause/resume)
+telemetry_timeout: 0.1   # Wait 0.1 seconds (very responsive)  
+telemetry_timeout: 5.0   # Wait 5 seconds (less sensitive to brief pauses)
+```
 
 ### Custom Colors
 
@@ -205,29 +285,57 @@ Change the RGB color in `hueflash.py`:
 ### Telemetry Data
 
 The script uses the `gt-telem` library to receive UDP telemetry from GT7 at 60Hz. Key data points:
-- `rev_limit`: Boolean flag when engine hits rev limiter
-- `engine_rpm`: Current engine RPM
-- `speed_kph`: Current speed
+- `rev_limit`: Boolean flag when engine hits rev limiter (used by both scripts)
+- `engine_rpm`: Current engine RPM (used for race detection)
+- `speed_kph`: Current speed (used for race detection)
+- `position_x/y/z`: Car position coordinates (used by `drive.py` for pause detection)
+- `time_of_day_ms`: Game time (used by `drive.py` for pause detection)
+
+### Advanced Pause Detection (`drive.py`) 🆕
+
+The room lighting system uses sophisticated pause detection:
+1. **Data Change Analysis**: Compares current telemetry with previous data
+2. **Multi-Point Detection**: Monitors RPM, speed, position, and game time
+3. **Freeze Duration Tracking**: Measures how long data has been unchanged  
+4. **Smart Timing**: Only triggers room restoration after configured timeout
+5. **Resume Detection**: Cancels restoration if driving resumes before timeout
 
 ### Network Protocol
 
 - **GT7 → Script**: UDP telemetry on port 33740
 - **Script → Home Assistant**: HTTP REST API calls
-- **Home Assistant → Hue**: Zigbee/WiFi commands to Hue Bridge
+- **Home Assistant → Lights**: Various protocols (Zigbee, WiFi, Z-Wave) depending on your devices
 
 ### Performance
 
-- **CPU Usage**: Minimal (boolean checks only)
+- **CPU Usage**: Minimal (boolean checks and simple data comparison)
 - **Network Traffic**: ~60 packets/second from GT7, occasional REST calls to HA
-- **Response Time**: Near-instantaneous (< 50ms total latency)
+- **Response Time**: Near-instantaneous shift light (< 50ms), smart room lighting (< 1s)
+- **Memory Usage**: Low (stores only previous telemetry data for comparison)
 
 ## 🤝 Contributing
 
 Contributions welcome! Areas for improvement:
-- Mobile app for configuration
-- Multiple shift points based on optimal shift RPM
-- Integration with other racing games
+- Mobile app for configuration  
 - Web interface for monitoring
+- Integration with other racing games (F1, Forza, etc.)
+- Advanced lighting effects (breathing, pulsing, color transitions)
+- Multiple shift points based on optimal shift RPM vs rev limiter
+- Voice announcements for race events
+- Integration with streaming overlays
+
+## 🎮 Usage Scenarios
+
+### Casual Racing
+Use `hueflash.py` for simple shift light functionality without room automation.
+
+### Immersive Racing Setup 🆕  
+Use `drive.py` for the full experience:
+- Lights dim automatically when race starts
+- Focus entirely on the track without room light distractions
+- Shift light keeps you in the optimal RPM range
+- Lights restore automatically when you pause or finish
+- Perfect for long racing sessions or competitive events
 
 ## 📄 License
 
@@ -242,4 +350,4 @@ MIT License - Feel free to use and modify!
 
 ---
 
-**Ready to race? Fire up GT7 and feel the thrill of a real shift light!** 🏁🔴
+**Ready to race with the ultimate lighting experience? Fire up GT7 and enjoy immersive racing with automatic room lighting and precise shift timing!** 🏁🔴💡
