@@ -145,11 +145,12 @@ SCREEN_LAYOUTS = {
 }
 
 class StreamDeckGT7:
-    def __init__(self, simulate=False):
+    def __init__(self, simulate=False, brightness=50):
         self.deck = None
         self.button_images = {}
         self.simulate = simulate
         self.current_screen = "main"
+        self.brightness = brightness
         
     def initialize_streamdeck(self):
         """Initialize Stream Deck connection"""
@@ -157,6 +158,7 @@ class StreamDeckGT7:
             logger.info("Running in simulation mode")
             print("🔄 Running in Stream Deck simulation mode")
             print("📱 Virtual Stream Deck Mini initialized (3x2 layout)")
+            print(f"🔆 Virtual brightness set to {self.brightness}%")
             self.create_initial_buttons()
             return True
             
@@ -176,14 +178,16 @@ class StreamDeckGT7:
             self.deck.reset()
             
             # Set brightness
-            self.deck.set_brightness(50)
+            self.deck.set_brightness(self.brightness)
             
             # Set up button press callback
             self.deck.set_key_callback(self.button_callback)
             
             logger.info(f"Connected to {self.deck.deck_type()}")
             logger.info(f"Buttons: {self.deck.key_count()}")
+            logger.info(f"Brightness set to {self.brightness}%")
             print(f"✅ Connected to {self.deck.deck_type()}")
+            print(f"🔆 Brightness set to {self.brightness}%")
             print("🔄 Press any button to cycle screens")
             
             # Initialize button images
@@ -756,9 +760,12 @@ def main():
     parser = argparse.ArgumentParser(description='GT7 Stream Deck Integration')
     parser.add_argument('--simulate', action='store_true', 
                        help='Run in simulation mode without hardware')
+    parser.add_argument('--brightness', type=int, default=50, choices=range(1, 101),
+                       help='Set Stream Deck brightness (1-100, default: 50)')
     args = parser.parse_args()
     
     logger.info("Starting GT7 Stream Deck integration")
+    logger.info(f"Stream Deck brightness: {args.brightness}%")
     logger.info(f"Configured room lights: {ROOM_LIGHTS}")
     logger.info(f"Shift light entity: {HUE_LIGHT_ENTITY}")
     
@@ -767,7 +774,7 @@ def main():
     signal.signal(signal.SIGTERM, shutdown_handler)
     
     # Initialize Stream Deck
-    stream_deck_gt7 = StreamDeckGT7(simulate=args.simulate)
+    stream_deck_gt7 = StreamDeckGT7(simulate=args.simulate, brightness=args.brightness)
     
     # Initialize Stream Deck
     if not stream_deck_gt7.initialize_streamdeck():

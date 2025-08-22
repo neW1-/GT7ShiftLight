@@ -7,14 +7,19 @@ A comprehensive lighting system for Gran Turismo 7 that provides multiple ways t
 ![GT7](https://img.shields.io/badge/Gran%20Turismo-7-red)
 ![Home Assistant](https://img.shields.io/badge/Home-Assistant-blue)
 
-## ✨ Four Different GT7 Experiences
+## ✨ Five Different GT7 Experiences
 
-### 📱 Stream Deck Hardware Dashboard (`streamdeck_gt7.py`) 🆕
-- **Physical button displays**: Real-time telemetry on Stream Deck Mini hardware
-- **Visual progress bars**: RPM and fuel levels with color-coded indicators
-- **Live button updates**: RPM, speed, gear, shift light, fuel, and status
-- **Hardware integration**: Professional racing setup with physical buttons
-- **All automation features**: Complete room lighting and shift light integration
+### 📱 Stream Deck Multi-Screen Dashboard (`streamdeck_gt7.py`) 🆕
+- **Physical button displays**: Real-time telemetry on Stream Deck Mini hardware (6 buttons, 3x2 layout)
+- **Multi-screen layouts**: Two switchable screens - Main telemetry view and Visual gear display
+- **Button press switching**: Press ANY button to cycle between screens seamlessly
+- **Main screen features**: Shift light, GT7's suggested gear, current gear, speed, RPM with progress bar, driving status
+- **Gear screen features**: Visual gear indicators (buttons 1-6) with color coding for current/suggested gears
+- **Advanced telemetry**: GT7's built-in gear suggestions displayed in real-time
+- **Visual progress indicators**: RPM gauge with color-coded rev limit warnings
+- **Brightness control**: Adjustable brightness (1-100%) via command line
+- **Complete automation**: Full room lighting and shift light integration
+- **Professional hardware setup**: Perfect for dedicated sim racing rigs
 
 ### 💻 TUI Racing Dashboard (`drivetui.py`)
 - **Real-time visual dashboard**: Terminal-based racing display with progress bars
@@ -41,12 +46,16 @@ A comprehensive lighting system for Gran Turismo 7 that provides multiple ways t
 
 ## 🎯 How It Works
 
-### Stream Deck Hardware Dashboard (`streamdeck_gt7.py`) 🆕
-1. **Physical Button Display**: Connects to Stream Deck Mini (6 buttons in 3x2 layout)
-2. **Real-time Updates**: Updates button displays at 10Hz with live telemetry data
-3. **Visual Progress Bars**: RPM and fuel shown as progress bars on button screens
-4. **Color Coding**: Red RPM when at redline, flashing shift button at rev limit
-5. **Complete Integration**: Includes all room lighting and shift light features
+### Stream Deck Multi-Screen Dashboard (`streamdeck_gt7.py`) 🆕
+1. **Physical Hardware Connection**: Connects to Stream Deck Mini (6 buttons in 3x2 layout)
+2. **Multi-Screen System**: Two dedicated screen layouts accessible via button press
+3. **Main Screen Layout**: [SHIFT][GT7][GEAR] / [SPEED][RPM][STATUS] - Complete telemetry overview
+4. **Gear Screen Layout**: [1][2][3] / [4][5][6] - Visual gear indicators with color coding
+5. **Real-time Updates**: Updates button displays at 10Hz with live telemetry data
+6. **GT7 Integration**: Shows GT7's native suggested gear recommendations
+7. **Visual Feedback**: Progress bars, color coding, and flashing indicators
+8. **Brightness Control**: Adjustable display brightness (1-100%)
+9. **Complete Automation**: All room lighting and shift light features included
 
 ### TUI Racing Dashboard (`drivetui.py`)
 1. **Terminal Interface**: Creates a professional racing dashboard in your terminal
@@ -79,6 +88,7 @@ A comprehensive lighting system for Gran Turismo 7 that provides multiple ways t
 - **Home Assistant** server (Raspberry Pi, NUC, etc.)
 - **Any Home Assistant-compatible light** (Hue, LIFX, smart switches, etc.)
 - **Network connection** between all devices
+- **Stream Deck Mini** (optional, for `streamdeck_gt7.py`) - 6 button hardware controller
 
 ## 🏁 Quick Start
 
@@ -87,6 +97,9 @@ A comprehensive lighting system for Gran Turismo 7 that provides multiple ways t
 **Python Dependencies:**
 ```bash
 pip install gt-telem requests pyyaml
+
+# For Stream Deck support (optional):
+pip install streamdeck pillow
 ```
 
 **GT7 Setup:**
@@ -165,6 +178,25 @@ python3 drive.py
 ```bash
 python3 drivetui.py
 ```
+
+#### Stream Deck Multi-Screen Hardware Experience (Professional): 🆕
+```bash
+# Default brightness (50%)
+python3 streamdeck_gt7.py
+
+# Custom brightness (1-100%)
+python3 streamdeck_gt7.py --brightness 75
+
+# Simulation mode (without hardware)
+python3 streamdeck_gt7.py --simulate --brightness 25
+```
+
+**Stream Deck Features:**
+- **Main Screen**: Complete telemetry overview with shift light, GT7 gear suggestions, current gear, speed, RPM progress bar, and status
+- **Gear Screen**: Visual gear display (buttons 1-6) with color coding - current gear in green, GT7 suggested gear in orange
+- **Screen Switching**: Press ANY button to cycle between Main and Gear screens
+- **Brightness Control**: Adjust display brightness from 1-100% via command line
+- **Professional Setup**: Perfect for dedicated racing rigs and streaming setups
 
 You should see a real-time racing dashboard:
 ```
@@ -270,6 +302,18 @@ python3 hueflash.py
 - Check all IP addresses are correct
 - Verify devices are on the same network
 - Restart Home Assistant if needed
+
+**Stream Deck Issues** 🆕
+- **"No Stream Deck devices found"**: 
+  - Ensure Stream Deck Mini is connected via USB
+  - Close the official Stream Deck software (conflicts with direct access)
+  - Try running with `sudo` for hardware permissions
+  - Use `--simulate` flag to test without hardware
+- **"Permission denied accessing Stream Deck"**: 
+  - Run with `sudo python3 streamdeck_gt7.py`
+  - Or set up proper udev rules for non-root access
+  - Use simulation mode: `python3 streamdeck_gt7.py --simulate`
+- **Buttons not updating**: Check GT7 telemetry is enabled and PS5 IP is correct
 
 ### Debug Mode
 
@@ -416,13 +460,15 @@ Use `drivetui.py` for the ultimate racing experience:
 - Monitor performance metrics in real-time
 
 ### Professional Hardware Dashboard 🆕
-Use `streamdeck_gt7.py` for the ultimate physical setup:
-- Real-time telemetry displayed on Stream Deck Mini hardware buttons
-- Visual progress bars for RPM and fuel levels
-- Physical button indicators for shift light, gear, and status
-- All immersive room lighting automation features included
-- Professional racing setup with dedicated hardware controls
-- Perfect for serious sim racing setups and professional streamers
+Use `streamdeck_gt7.py` for the ultimate physical racing setup:
+- **Multi-screen hardware interface**: Two dedicated screen layouts on physical Stream Deck Mini
+- **Main screen telemetry**: Shift light, GT7 gear suggestions, current gear, speed, RPM progress, status
+- **Visual gear screen**: Physical buttons 1-6 represent gears with color coding (green=current, orange=suggested)
+- **Instant screen switching**: Press any button to cycle between telemetry and gear views
+- **Professional presentation**: Perfect for serious sim racing rigs, streaming setups, and competitive racing
+- **Customizable brightness**: Adjust display brightness (1-100%) for any lighting condition
+- **Complete integration**: All immersive room lighting features included
+- **Hardware simulation**: Test functionality without physical hardware using simulation mode
 
 ## 📄 License
 
