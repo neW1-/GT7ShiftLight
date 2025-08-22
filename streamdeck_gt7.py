@@ -182,9 +182,9 @@ class StreamDeckGT7:
             self.rotated_main = original_main
             self.rotated_gears = original_gears
         elif self.rotation == 90:  # 90° clockwise
-            # Button mapping for 90° rotation: [0,1,2] -> [3,0,1]
-            #                                   [3,4,5] -> [4,5,2]
-            rotation_map = {0: 3, 1: 0, 2: 1, 3: 4, 4: 5, 5: 2}
+            # Custom button mapping with gear3 and gear4 swapped
+            # 0->2, 1->5, 2->1, 3->4, 4->0, 5->3
+            rotation_map = {0: 2, 1: 5, 2: 1, 3: 4, 4: 0, 5: 3}
             self.rotated_main = {rotation_map[k]: v for k, v in original_main.items()}
             self.rotated_gears = {rotation_map[k]: v for k, v in original_gears.items()}
         elif self.rotation == 180:  # 180° rotation
@@ -194,9 +194,8 @@ class StreamDeckGT7:
             self.rotated_main = {rotation_map[k]: v for k, v in original_main.items()}
             self.rotated_gears = {rotation_map[k]: v for k, v in original_gears.items()}
         elif self.rotation == 270:  # 270° clockwise (90° counter-clockwise)
-            # Button mapping for 270° rotation: [0,1,2] -> [1,2,5]
-            #                                    [3,4,5] -> [0,3,4]
-            rotation_map = {0: 1, 1: 2, 2: 5, 3: 0, 4: 3, 5: 4}
+            # Inverse of the 90° mapping: 0->4, 1->3, 2->0, 3->5, 4->2, 5->1
+            rotation_map = {0: 4, 1: 3, 2: 0, 3: 5, 4: 2, 5: 1}
             self.rotated_main = {rotation_map[k]: v for k, v in original_main.items()}
             self.rotated_gears = {rotation_map[k]: v for k, v in original_gears.items()}
         
