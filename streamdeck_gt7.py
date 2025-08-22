@@ -114,6 +114,7 @@ last_telemetry_time = None
 packet_count = 0
 last_telemetry_data = None
 data_frozen_start = None
+last_status = None  # Track last printed status
 
 # Stream Deck variables
 current_telemetry = None
@@ -656,6 +657,15 @@ def is_actually_driving(packet):
         logger.error(f"Error checking driving context: {e}")
         return False
 
+def print_status(status):
+    """Print status with carriage return to overwrite previous line"""
+    global last_status
+    
+    if status != last_status:
+        # Clear previous line and print new status
+        print(f"\r{' ' * 60}\r{status}", end='', flush=True)
+        last_status = status
+
 def telemetry_callback(telemetry):
     """Main telemetry callback with Stream Deck updates"""
     global current_telemetry, shift_light_active, packet_count, telemetry_timer
@@ -683,6 +693,7 @@ def telemetry_callback(telemetry):
                 telemetry_timer = None
             
             enter_driving_mode()
+            print_status("🏁 Racing - Room lights OFF")
             
             # Handle shift light
             at_rev_limit = getattr(telemetry, 'rev_limit', False)
@@ -691,18 +702,22 @@ def telemetry_callback(telemetry):
                 logger.info("🔴 Shift light ON - Rev limit reached!")
                 shift_light_active = True
                 set_shift_light_brightness(1.0)
+                print_status("🏁 Racing - Room lights OFF | 🔴 SHIFT!")
                 
             elif not at_rev_limit and shift_light_active:
                 logger.info("⚫ Shift light OFF - Rev limit cleared")
                 shift_light_active = False
                 set_shift_light_brightness(0.0)
+                print_status("🏁 Racing - Room lights OFF")
         else:
             # Data frozen in driving context - exit immediately
             if frozen_duration > 1.0:  # Small delay to avoid flickering
-                logger.info(f"🛑 Data frozen for {frozen_duration:.1f}s - exiting driving mode immediately")
+                print_status("⏸️  Paused - Exiting driving mode...")
                 exit_driving_mode()
+                print_status("⏸️  Paused - Room lights ON")
     else:
         # Not in racing context
+        print_status("⏳ Waiting for GT7 activity...")
         if data_changing or frozen_duration > 30.0:
             exit_driving_mode()
 
