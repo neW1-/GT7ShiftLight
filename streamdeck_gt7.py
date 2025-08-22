@@ -194,8 +194,8 @@ class StreamDeckGT7:
             self.rotated_main = {rotation_map[k]: v for k, v in original_main.items()}
             self.rotated_gears = {rotation_map[k]: v for k, v in original_gears.items()}
         elif self.rotation == 270:  # 270° clockwise (90° counter-clockwise)
-            # Inverse of the 90° mapping: 0->4, 1->3, 2->0, 3->5, 4->2, 5->1
-            rotation_map = {0: 4, 1: 3, 2: 0, 3: 5, 4: 2, 5: 1}
+            # Correct mapping: G1->4, G2->1, G3->5, G4->2, G5->6, G6->3
+            rotation_map = {0: 3, 1: 0, 2: 4, 3: 1, 4: 5, 5: 2}
             self.rotated_main = {rotation_map[k]: v for k, v in original_main.items()}
             self.rotated_gears = {rotation_map[k]: v for k, v in original_gears.items()}
         
