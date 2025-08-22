@@ -18,6 +18,7 @@ A comprehensive lighting system for Gran Turismo 7 that provides multiple ways t
 - **Advanced telemetry**: GT7's built-in gear suggestions displayed in real-time
 - **Visual progress indicators**: RPM gauge with color-coded rev limit warnings
 - **Brightness control**: Adjustable brightness (1-100%) via command line
+- **Rotation support**: Mount at any angle (0°, 90°, 180°, 270°) with automatic layout adjustment
 - **Complete automation**: Full room lighting and shift light integration
 - **Professional hardware setup**: Perfect for dedicated sim racing rigs
 
@@ -55,7 +56,8 @@ A comprehensive lighting system for Gran Turismo 7 that provides multiple ways t
 6. **GT7 Integration**: Shows GT7's native suggested gear recommendations
 7. **Visual Feedback**: Progress bars, color coding, and flashing indicators
 8. **Brightness Control**: Adjustable display brightness (1-100%)
-9. **Complete Automation**: All room lighting and shift light features included
+9. **Rotation Support**: Mount Stream Deck at any angle (0°, 90°, 180°, 270°) with automatic button layout adjustment
+10. **Complete Automation**: All room lighting and shift light features included
 
 ### TUI Racing Dashboard (`drivetui.py`)
 1. **Terminal Interface**: Creates a professional racing dashboard in your terminal
@@ -181,14 +183,20 @@ python3 drivetui.py
 
 #### Stream Deck Multi-Screen Hardware Experience (Professional): 🆕
 ```bash
-# Default brightness (50%)
+# Default brightness (50%), default rotation (0°)
 python3 streamdeck_gt7.py
 
 # Custom brightness (1-100%)
 python3 streamdeck_gt7.py --brightness 75
 
+# Custom rotation for different mounting angles (0°, 90°, 180°, 270°)
+python3 streamdeck_gt7.py --rotation 90
+
+# Combined brightness and rotation settings
+python3 streamdeck_gt7.py --brightness 25 --rotation 180
+
 # Simulation mode (without hardware)
-python3 streamdeck_gt7.py --simulate --brightness 25
+python3 streamdeck_gt7.py --simulate --brightness 25 --rotation 270
 ```
 
 **Stream Deck Features:**
@@ -196,6 +204,7 @@ python3 streamdeck_gt7.py --simulate --brightness 25
 - **Gear Screen**: Visual gear display (buttons 1-6) with color coding - current gear in green, GT7 suggested gear in orange
 - **Screen Switching**: Press ANY button to cycle between Main and Gear screens
 - **Brightness Control**: Adjust display brightness from 1-100% via command line
+- **Rotation Support**: Perfect mounting at any angle (0°, 90°, 180°, 270°) with automatic button layout adjustment
 - **Professional Setup**: Perfect for dedicated racing rigs and streaming setups
 
 You should see a real-time racing dashboard:
@@ -469,6 +478,7 @@ Use `streamdeck_gt7.py` for the ultimate physical racing setup:
 - **Customizable brightness**: Adjust display brightness (1-100%) for any lighting condition
 - **Complete integration**: All immersive room lighting features included
 - **Hardware simulation**: Test functionality without physical hardware using simulation mode
+- **Rotation flexibility**: Mount Stream Deck at any angle with automatic button remapping for perfect viewing
 
 ## 📄 License
 
