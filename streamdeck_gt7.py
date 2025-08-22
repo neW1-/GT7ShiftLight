@@ -177,32 +177,47 @@ class StreamDeckGT7:
             5: "gear6"         # Bottom right
         }
         
+        # H-shifter layout (3rd screen) - matches real H-shifter gate pattern
+        original_h_shifter = {
+            0: "gear1",        # Button 1: Gear 1
+            1: "gear3",        # Button 2: Gear 3  
+            2: "gear5",        # Button 3: Gear 5
+            3: "gear2",        # Button 4: Gear 2
+            4: "gear4",        # Button 5: Gear 4
+            5: "gear6"         # Button 6: Gear 6
+        }
+        
         # Apply rotation mapping
         if self.rotation == 0:
             self.rotated_main = original_main
             self.rotated_gears = original_gears
+            self.rotated_h_shifter = original_h_shifter
         elif self.rotation == 90:  # 90° clockwise
             # Custom button mapping with gear3 and gear4 swapped
             # 0->2, 1->5, 2->1, 3->4, 4->0, 5->3
             rotation_map = {0: 2, 1: 5, 2: 1, 3: 4, 4: 0, 5: 3}
             self.rotated_main = {rotation_map[k]: v for k, v in original_main.items()}
             self.rotated_gears = {rotation_map[k]: v for k, v in original_gears.items()}
+            self.rotated_h_shifter = {rotation_map[k]: v for k, v in original_h_shifter.items()}
         elif self.rotation == 180:  # 180° rotation
             # Button mapping for 180° rotation: [0,1,2] -> [5,4,3]
             #                                    [3,4,5] -> [2,1,0]
             rotation_map = {0: 5, 1: 4, 2: 3, 3: 2, 4: 1, 5: 0}
             self.rotated_main = {rotation_map[k]: v for k, v in original_main.items()}
             self.rotated_gears = {rotation_map[k]: v for k, v in original_gears.items()}
+            self.rotated_h_shifter = {rotation_map[k]: v for k, v in original_h_shifter.items()}
         elif self.rotation == 270:  # 270° clockwise (90° counter-clockwise)
             # Correct mapping: G1->4, G2->1, G3->5, G4->2, G5->6, G6->3
             rotation_map = {0: 3, 1: 0, 2: 4, 3: 1, 4: 5, 5: 2}
             self.rotated_main = {rotation_map[k]: v for k, v in original_main.items()}
             self.rotated_gears = {rotation_map[k]: v for k, v in original_gears.items()}
+            self.rotated_h_shifter = {rotation_map[k]: v for k, v in original_h_shifter.items()}
         
         # Store the current layouts
         self.screen_layouts = {
             "main": self.rotated_main,
-            "gears": self.rotated_gears
+            "gears": self.rotated_gears,
+            "h_shifter": self.rotated_h_shifter
         }
     
     def print_rotated_main_layout(self):
@@ -236,6 +251,26 @@ class StreamDeckGT7:
         if self.rotation != 0:
             print(f"   (Rotated {self.rotation}°)")
     
+    def print_rotated_h_shifter_layout(self):
+        """Print the H-shifter screen layout adjusted for rotation"""
+        # Create a mapping of button positions to gear labels
+        layout = self.screen_layouts["h_shifter"]
+        
+        # Create display grid
+        grid = [["?", "?", "?"], ["?", "?", "?"]]
+        
+        for button_id, gear_type in layout.items():
+            row = 0 if button_id < 3 else 1
+            col = button_id % 3
+            # Extract gear number from gear_type (e.g., "gear1" -> "1")
+            gear_num = gear_type.replace("gear", "")
+            grid[row][col] = f"G{gear_num}"
+        
+        print(f"\nH-Shifter Screen Layout (rotation {self.rotation}°):")
+        print(f"[{grid[0][0]}] [{grid[0][1]}] [{grid[0][2]}]")
+        print(f"[{grid[1][0]}] [{grid[1][1]}] [{grid[1][2]}]")
+        print("H-shifter gate pattern - matches real shifter layout!")
+
     def print_rotated_gear_layout(self):
         """Print the gear screen layout adjusted for rotation"""
         layout = self.screen_layouts["gears"]
@@ -372,6 +407,8 @@ class StreamDeckGT7:
             self.create_main_screen()
         elif self.current_screen == "gears":
             self.create_gear_screen()
+        elif self.current_screen == "h_shifter":
+            self.create_h_shifter_screen()
     
     def create_main_screen(self):
         """Create the main telemetry screen"""
@@ -402,13 +439,83 @@ class StreamDeckGT7:
             print("🔄 Initializing Gear Screen...")
             self.print_rotated_gear_layout()
             return
-            return
             
         # Create gear buttons 1-6 (no text, just colors)
         for gear_num in range(1, 7):
             button_id = gear_num - 1  # buttons 0-5 for gears 1-6
             # Default to dark background
             image = self.create_button_image("", "", color=(80, 80, 80), bg_color=(20, 20, 20))
+            
+            if self.deck:
+                native_image = PILHelper.to_native_format(self.deck, image)
+                self.deck.set_key_image(button_id, native_image)
+
+    def create_h_shifter_screen(self):
+        """Create the H-shifter pattern screen"""
+        if self.simulate:
+            print("🔄 Initializing H-Shifter Screen...")
+            self.print_rotated_h_shifter_layout()
+            return
+            
+        # Create H-shifter buttons (no text, just colors)
+        for button_id in range(6):
+            # Default to dark background
+            image = self.create_button_image("", "", color=(80, 80, 80), bg_color=(20, 20, 20))
+            
+            if self.deck:
+                native_image = PILHelper.to_native_format(self.deck, image)
+                self.deck.set_key_image(button_id, native_image)
+
+    def update_h_shifter_screen_telemetry(self):
+        """Update H-shifter screen with telemetry data"""
+        global current_telemetry, shift_light_active
+        
+        if not current_telemetry:
+            return
+            
+        if self.simulate:
+            # In simulation mode, just print the layout once
+            return
+            
+        # Get telemetry data
+        gear = getattr(current_telemetry, 'current_gear', 0) 
+        suggested_gear_num = getattr(current_telemetry, 'suggested_gear', 0)
+        
+        # Update each button based on the H-shifter layout
+        for button_id in range(6):
+            # Find which gear this button represents in the rotated H-shifter layout
+            gear_button_name = None
+            for bid, btype in self.screen_layouts["h_shifter"].items():
+                if bid == button_id:
+                    gear_button_name = btype
+                    break
+            
+            if not gear_button_name:
+                continue
+                
+            # Extract gear number from gear_button_name (e.g., "gear1" -> 1)
+            gear_num = int(gear_button_name.replace("gear", ""))
+            
+            # Determine button color based on current state
+            if gear == gear_num:
+                # Current gear - bright green (or flashing red if at rev limit)
+                if shift_light_active:
+                    color = (255, 0, 0)  # Flash red at rev limit
+                    bg_color = (255, 0, 0)
+                else:
+                    color = (0, 255, 0)  # Bright green for current gear
+                    bg_color = (0, 128, 0)
+            elif suggested_gear_num == gear_num and suggested_gear_num > 0 and suggested_gear_num <= 8:
+                # GT7 suggested gear - bright orange
+                color = (255, 165, 0)
+                bg_color = (128, 82, 0)
+            else:
+                # Not current, not suggested - dark
+                color = (80, 80, 80)
+                bg_color = (20, 20, 20)
+            
+            # Create button with no text (just color)
+            image = self.create_button_image("", "", color, bg_color)
             
             if self.deck:
                 native_image = PILHelper.to_native_format(self.deck, image)
@@ -426,7 +533,14 @@ class StreamDeckGT7:
         next_index = (current_index + 1) % len(screens)
         self.current_screen = screens[next_index]
         
-        print(f"🔄 Switching to {self.current_screen} screen")
+        # Create user-friendly screen name
+        screen_names = {
+            "main": "Main Telemetry",
+            "gears": "Sequential Gears", 
+            "h_shifter": "H-Pattern Shifter"
+        }
+        screen_display_name = screen_names.get(self.current_screen, self.current_screen)
+        print(f"🔄 Switching to {screen_display_name} screen")
         
         # Recreate the screen layout
         self.create_initial_buttons()
@@ -473,6 +587,8 @@ class StreamDeckGT7:
             self.update_main_screen_telemetry()
         elif self.current_screen == "gears":
             self.update_gear_screen_telemetry()
+        elif self.current_screen == "h_shifter":
+            self.update_h_shifter_screen_telemetry()
     
     def update_main_screen_telemetry(self):
         """Update main screen with telemetry data"""
