@@ -121,6 +121,7 @@ streamdeck = None
 running = True
 telemetry_lock = threading.Lock()
 simulation_mode = False
+gt7_client = None  # Add global client variable
 
 # Screen layouts for Stream Deck Mini (6 buttons: 3x2)
 SCREEN_LAYOUTS = {
@@ -707,11 +708,19 @@ def telemetry_callback(telemetry):
 
 def shutdown_handler(signum, frame):
     """Handle shutdown signals gracefully"""
-    global running, telemetry_timer, stream_deck_gt7
+    global running, telemetry_timer, stream_deck_gt7, gt7_client
     
     print("\n🛑 Shutdown signal received...")
     logger.info("Shutdown signal received...")
     running = False
+    
+    # Stop GT7 client first to prevent new callbacks
+    if gt7_client:
+        try:
+            logger.info("Stopping GT7 telemetry client...")
+            gt7_client.stop()
+        except Exception as e:
+            logger.error(f"Error stopping GT7 client: {e}")
     
     if telemetry_timer:
         telemetry_timer.cancel()
@@ -726,7 +735,7 @@ def shutdown_handler(signum, frame):
 
 def main():
     """Main function"""
-    global running, stream_deck_gt7
+    global running, stream_deck_gt7, gt7_client
     
     # Parse command line arguments
     parser = argparse.ArgumentParser(description='GT7 Stream Deck Integration')
@@ -753,7 +762,7 @@ def main():
     try:
         # Start GT7 telemetry with standard client
         try:
-            client = TurismoClient(ps_ip=PS5_IP)
+            gt7_client = TurismoClient(ps_ip=PS5_IP)
             print("✅ Connected to PS5 successfully!")
         except PlayStatonOnStandbyError:
             print("❌ Error: PlayStation at {} is on standby.".format(PS5_IP))
@@ -763,9 +772,9 @@ def main():
             print(f"❌ Error connecting to PS5: {e}")
             return
             
-        client.register_callback(telemetry_callback)
+        gt7_client.register_callback(telemetry_callback)
         
-        telemetry_thread = threading.Thread(target=client.start, daemon=True)
+        telemetry_thread = threading.Thread(target=gt7_client.start, daemon=True)
         telemetry_thread.start()
         
         logger.info("GT7 telemetry client started")
@@ -810,6 +819,14 @@ def main():
         print("🔄 Cleaning up...")
         logger.info("Shutting down...")
         running = False
+        
+        # Stop GT7 client first
+        if gt7_client:
+            try:
+                logger.info("Stopping GT7 telemetry client...")
+                gt7_client.stop()
+            except Exception as e:
+                logger.error(f"Error stopping GT7 client: {e}")
         
         if stream_deck_gt7:
             stream_deck_gt7.close()
