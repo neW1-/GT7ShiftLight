@@ -1,0 +1,16 @@
+# GT7 Stream Deck Requirements
+# Install with: pip install -r requirements-streamdeck.txt
+
+# Core GT7 telemetry
+gt-telem
+
+# Stream Deck support
+streamdeck
+Pillow
+
+# Configuration and HTTP requests
+PyYAML
+requests
+
+# System dependencies
+psutil

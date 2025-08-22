@@ -1,22 +1,30 @@
 # GT7 Shift Light & Room Lighting for Home Assistant
 
-A comprehensive lighting system for Gran Turismo 7 that not only provides shift light functionality but also creates an immersive racing environment by automatically controlling your room lighting during races.
+A comprehensive lighting system for Gran Turismo 7 that provides multiple ways to experience telemetry data with shift light functionality and immersive room automation.
 
 ![GT7 Shift Light Demo](https://img.shields.io/badge/Status-Working-brightgreen)
 ![Python](https://img.shields.io/badge/Python-3.7+-blue)
 ![GT7](https://img.shields.io/badge/Gran%20Turismo-7-red)
 ![Home Assistant](https://img.shields.io/badge/Home-Assistant-blue)
 
-## ✨ Features
+## ✨ Four Different GT7 Experiences
 
-### Shift Light System (`hueflash.py`)
-- **Real-time telemetry**: Uses GT7's UDP telemetry data at 60Hz
-- **GT7 rev limiter detection**: Automatically triggers on GT7's built-in rev limiter
-- **Bright red shift light**: Flashes any Home Assistant light bright red when it's time to shift
-- **Automatic car detection**: Works with any car's specific rev limit
-- **Low CPU usage**: Efficient boolean-based detection
+### 📱 Stream Deck Hardware Dashboard (`streamdeck_gt7.py`) 🆕
+- **Physical button displays**: Real-time telemetry on Stream Deck Mini hardware
+- **Visual progress bars**: RPM and fuel levels with color-coded indicators
+- **Live button updates**: RPM, speed, gear, shift light, fuel, and status
+- **Hardware integration**: Professional racing setup with physical buttons
+- **All automation features**: Complete room lighting and shift light integration
 
-### Immersive Room Lighting System (`drive.py`) 🆕
+### 💻 TUI Racing Dashboard (`drivetui.py`)
+- **Real-time visual dashboard**: Terminal-based racing display with progress bars
+- **Live telemetry bars**: RPM, Speed, and Fuel level with visual indicators
+- **Color-coded status**: Green for normal, red for warnings/critical levels
+- **Complete racing info**: Gear, throttle %, brake %, shift light status
+- **Room lighting integration**: All the smart lighting features of `drive.py`
+- **60Hz updates**: Smooth, responsive real-time data visualization
+
+### 🏠 Immersive Room Lighting (`drive.py`)
 - **Automatic room lighting control**: Turns off room lights when driving starts
 - **Smart pause detection**: Detects when game is paused (data stops changing) for >1 second
 - **Intelligent restoration**: Restores previous room lighting when game is paused/stopped
@@ -24,16 +32,28 @@ A comprehensive lighting system for Gran Turismo 7 that not only provides shift 
 - **Configurable timeout**: Customizable delay before restoring lights
 - **Combined functionality**: Includes shift light + room automation in one script
 
-### TUI Racing Dashboard (`drivetui.py`) 🆕
-- **Real-time visual dashboard**: Terminal-based racing display with progress bars
-- **Live telemetry bars**: RPM, Speed, and Fuel level with visual indicators
-- **Color-coded status**: Green for normal, red for warnings/critical levels
-- **Complete racing info**: Gear, throttle %, brake %, shift light status
-- **Room lighting integration**: All the smart lighting features of `drive.py`
-- **60Hz updates**: Smooth, responsive real-time data visualization
-- **Minimal resource usage**: Lightweight terminal interface
+### 💡 Basic Shift Light (`hueflash.py`)
+- **Real-time telemetry**: Uses GT7's UDP telemetry data at 60Hz
+- **GT7 rev limiter detection**: Automatically triggers on GT7's built-in rev limiter
+- **Bright red shift light**: Flashes any Home Assistant light bright red when it's time to shift
+- **Automatic car detection**: Works with any car's specific rev limit
+- **Low CPU usage**: Efficient boolean-based detection
 
 ## 🎯 How It Works
+
+### Stream Deck Hardware Dashboard (`streamdeck_gt7.py`) 🆕
+1. **Physical Button Display**: Connects to Stream Deck Mini (6 buttons in 3x2 layout)
+2. **Real-time Updates**: Updates button displays at 10Hz with live telemetry data
+3. **Visual Progress Bars**: RPM and fuel shown as progress bars on button screens
+4. **Color Coding**: Red RPM when at redline, flashing shift button at rev limit
+5. **Complete Integration**: Includes all room lighting and shift light features
+
+### TUI Racing Dashboard (`drivetui.py`)
+1. **Terminal Interface**: Creates a professional racing dashboard in your terminal
+2. **Real-time Bars**: Live progress bars for RPM (red near redline), Speed, and Fuel
+3. **Color Coding**: Green for normal, yellow for warnings, red for critical
+4. **Live Updates**: 60Hz telemetry processing with smooth visual feedback
+5. **Complete Automation**: All room lighting features integrated
 
 ### Basic Shift Light (`hueflash.py`)
 1. **GT7 Telemetry**: Receives real-time telemetry data from Gran Turismo 7 via UDP
@@ -41,14 +61,12 @@ A comprehensive lighting system for Gran Turismo 7 that not only provides shift 
 3. **Light Control**: Sends commands to your Home Assistant light via REST API
 4. **Instant Response**: Light turns red when you hit the rev limiter, off when you shift
 
-### Immersive Room Lighting (`drive.py`) 🆕
+### Immersive Room Lighting (`drive.py`)
 1. **Race Detection**: Monitors telemetry to detect when you're actively driving
 2. **Smart Room Control**: Automatically saves current room light states and turns them off
 3. **Pause Detection**: Uses advanced data analysis to detect when game is paused (telemetry data stops changing)
 4. **Intelligent Restoration**: Waits for configurable timeout (default 0.5s) before restoring lights
 5. **Seamless Integration**: Combines shift light functionality with room automation
-
-### TUI Racing Dashboard (`drivetui.py`) 🆕
 1. **Real-Time Display**: Curses-based terminal interface with live telemetry visualization
 2. **Visual Progress Bars**: RPM, Speed, and Fuel displayed as colored progress bars
 3. **Racing Metrics**: Shows gear, throttle %, brake %, and shift light status
@@ -380,7 +398,7 @@ Contributions welcome! Areas for improvement:
 ### Casual Racing
 Use `hueflash.py` for simple shift light functionality without room automation.
 
-### Immersive Racing Setup 🆕  
+### Immersive Racing Setup  
 Use `drive.py` for the full experience:
 - Lights dim automatically when race starts
 - Focus entirely on the track without room light distractions
@@ -388,7 +406,7 @@ Use `drive.py` for the full experience:
 - Lights restore automatically when you pause or finish
 - Perfect for long racing sessions or competitive events
 
-### Professional Racing Dashboard 🆝
+### Professional Terminal Dashboard
 Use `drivetui.py` for the ultimate racing experience:
 - Real-time visual dashboard with progress bars for all key metrics
 - Color-coded warnings and status indicators
@@ -396,6 +414,15 @@ Use `drivetui.py` for the ultimate racing experience:
 - All immersive lighting features included
 - Perfect for streaming, competitive racing, or training sessions
 - Monitor performance metrics in real-time
+
+### Professional Hardware Dashboard 🆕
+Use `streamdeck_gt7.py` for the ultimate physical setup:
+- Real-time telemetry displayed on Stream Deck Mini hardware buttons
+- Visual progress bars for RPM and fuel levels
+- Physical button indicators for shift light, gear, and status
+- All immersive room lighting automation features included
+- Professional racing setup with dedicated hardware controls
+- Perfect for serious sim racing setups and professional streamers
 
 ## 📄 License
 
