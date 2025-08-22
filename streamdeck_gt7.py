@@ -145,12 +145,117 @@ SCREEN_LAYOUTS = {
 }
 
 class StreamDeckGT7:
-    def __init__(self, simulate=False, brightness=50):
+    def __init__(self, simulate=False, brightness=50, rotation=0):
         self.deck = None
         self.button_images = {}
         self.simulate = simulate
         self.current_screen = "main"
         self.brightness = brightness
+        self.rotation = rotation
+        
+        # Create rotated button mappings based on rotation
+        self.setup_rotated_layouts()
+        
+    def setup_rotated_layouts(self):
+        """Create button layouts adjusted for rotation"""
+        # Original layouts (0 degrees)
+        original_main = {
+            0: "shift",        # Top left
+            1: "suggested",    # Top middle (suggested gear)
+            2: "gear",         # Top right
+            3: "speed",        # Bottom left
+            4: "rpm",          # Bottom middle
+            5: "status"        # Bottom right
+        }
+        
+        original_gears = {
+            0: "gear1",        # Top left
+            1: "gear2",        # Top middle
+            2: "gear3",        # Top right
+            3: "gear4",        # Bottom left
+            4: "gear5",        # Bottom middle
+            5: "gear6"         # Bottom right
+        }
+        
+        # Apply rotation mapping
+        if self.rotation == 0:
+            self.rotated_main = original_main
+            self.rotated_gears = original_gears
+        elif self.rotation == 90:  # 90° clockwise
+            # Custom button mapping with gear3 and gear4 swapped
+            # 0->2, 1->5, 2->1, 3->4, 4->0, 5->3
+            rotation_map = {0: 2, 1: 5, 2: 1, 3: 4, 4: 0, 5: 3}
+            self.rotated_main = {rotation_map[k]: v for k, v in original_main.items()}
+            self.rotated_gears = {rotation_map[k]: v for k, v in original_gears.items()}
+        elif self.rotation == 180:  # 180° rotation
+            # Button mapping for 180° rotation: [0,1,2] -> [5,4,3]
+            #                                    [3,4,5] -> [2,1,0]
+            rotation_map = {0: 5, 1: 4, 2: 3, 3: 2, 4: 1, 5: 0}
+            self.rotated_main = {rotation_map[k]: v for k, v in original_main.items()}
+            self.rotated_gears = {rotation_map[k]: v for k, v in original_gears.items()}
+        elif self.rotation == 270:  # 270° clockwise (90° counter-clockwise)
+            # Correct mapping: G1->4, G2->1, G3->5, G4->2, G5->6, G6->3
+            rotation_map = {0: 3, 1: 0, 2: 4, 3: 1, 4: 5, 5: 2}
+            self.rotated_main = {rotation_map[k]: v for k, v in original_main.items()}
+            self.rotated_gears = {rotation_map[k]: v for k, v in original_gears.items()}
+        
+        # Store the current layouts
+        self.screen_layouts = {
+            "main": self.rotated_main,
+            "gears": self.rotated_gears
+        }
+    
+    def print_rotated_main_layout(self):
+        """Print the main screen layout adjusted for rotation"""
+        # Create a mapping of button positions to labels
+        layout = self.screen_layouts["main"]
+        labels = {
+            "shift": "SHIFT", "suggested": "GT7", "gear": "GEAR",
+            "speed": "SPEED", "rpm": "RPM", "status": "STATUS"
+        }
+        values = {
+            "shift": "Ready", "suggested": "N", "gear": "N", 
+            "speed": "0km/h", "rpm": "0", "status": "Wait"
+        }
+        
+        # Create 3x2 grid based on rotated layout
+        grid_labels = [""] * 6
+        grid_values = [""] * 6
+        
+        for button_id, button_type in layout.items():
+            grid_labels[button_id] = labels.get(button_type, "")
+            grid_values[button_id] = values.get(button_type, "")
+        
+        print("┌────────┬────────┬────────┐")
+        print(f"│{grid_labels[0]:^8}│{grid_labels[1]:^8}│{grid_labels[2]:^8}│")
+        print(f"│{grid_values[0]:^8}│{grid_values[1]:^8}│{grid_values[2]:^8}│")
+        print("├────────┼────────┼────────┤")
+        print(f"│{grid_labels[3]:^8}│{grid_labels[4]:^8}│{grid_labels[5]:^8}│")
+        print(f"│{grid_values[3]:^8}│{grid_values[4]:^8}│{grid_values[5]:^8}│")
+        print("└────────┴────────┴────────┘")
+        if self.rotation != 0:
+            print(f"   (Rotated {self.rotation}°)")
+    
+    def print_rotated_gear_layout(self):
+        """Print the gear screen layout adjusted for rotation"""
+        layout = self.screen_layouts["gears"]
+        
+        # Create 3x2 grid based on rotated layout
+        grid = [""] * 6
+        
+        for button_id, button_type in layout.items():
+            gear_num = button_type.replace("gear", "")
+            grid[button_id] = gear_num
+        
+        print("┌────────┬────────┬────────┐")
+        print(f"│   {grid[0]}    │   {grid[1]}    │   {grid[2]}    │")
+        print("│        │        │        │")
+        print("├────────┼────────┼────────┤")
+        print(f"│   {grid[3]}    │   {grid[4]}    │   {grid[5]}    │")
+        print("│        │        │        │")
+        print("└────────┴────────┴────────┘")
+        if self.rotation != 0:
+            print(f"   (Rotated {self.rotation}°)")
         
     def initialize_streamdeck(self):
         """Initialize Stream Deck connection"""
@@ -159,6 +264,7 @@ class StreamDeckGT7:
             print("🔄 Running in Stream Deck simulation mode")
             print("📱 Virtual Stream Deck Mini initialized (3x2 layout)")
             print(f"🔆 Virtual brightness set to {self.brightness}%")
+            print(f"🔄 Virtual rotation set to {self.rotation}°")
             self.create_initial_buttons()
             return True
             
@@ -186,8 +292,10 @@ class StreamDeckGT7:
             logger.info(f"Connected to {self.deck.deck_type()}")
             logger.info(f"Buttons: {self.deck.key_count()}")
             logger.info(f"Brightness set to {self.brightness}%")
+            logger.info(f"Rotation set to {self.rotation}°")
             print(f"✅ Connected to {self.deck.deck_type()}")
             print(f"🔆 Brightness set to {self.brightness}%")
+            print(f"🔄 Rotation set to {self.rotation}°")
             print("🔄 Press any button to cycle screens")
             
             # Initialize button images
@@ -252,6 +360,10 @@ class StreamDeckGT7:
                 progress_color = (255, 0, 0) if progress > 90 else (0, 255, 0) if progress > 70 else (255, 255, 0)
                 draw.rectangle([bar_x, bar_y, bar_x + fill_width, bar_y + bar_height], fill=progress_color)
         
+        # Apply rotation if specified
+        if self.rotation != 0:
+            image = image.rotate(-self.rotation, expand=False)
+        
         return image
     
     def create_initial_buttons(self):
@@ -265,13 +377,7 @@ class StreamDeckGT7:
         """Create the main telemetry screen"""
         if self.simulate:
             print("🔄 Initializing Main Screen...")
-            print("┌────────┬────────┬────────┐")
-            print("│ SHIFT  │  GT7   │ GEAR   │")
-            print("│ Ready  │   N    │   N    │")
-            print("├────────┼────────┼────────┤")
-            print("│ SPEED  │  RPM   │STATUS  │")
-            print("│ 0 km/h │   0    │Waiting │")
-            print("└────────┴────────┴────────┘")
+            self.print_rotated_main_layout()
             return
             
         buttons = {
@@ -283,7 +389,7 @@ class StreamDeckGT7:
             "status": self.create_button_image("STATUS", "Waiting", color=(255, 255, 0))
         }
         
-        layout = SCREEN_LAYOUTS[self.current_screen]
+        layout = self.screen_layouts[self.current_screen]
         for button_id, button_type in layout.items():
             if button_type in buttons:
                 # Convert PIL image to Stream Deck format
@@ -294,13 +400,8 @@ class StreamDeckGT7:
         """Create the gear visualization screen"""
         if self.simulate:
             print("🔄 Initializing Gear Screen...")
-            print("┌────────┬────────┬────────┐")
-            print("│   1    │   2    │   3    │")
-            print("│        │        │        │")
-            print("├────────┼────────┼────────┤")
-            print("│   4    │   5    │   6    │")
-            print("│        │        │        │")
-            print("└────────┴────────┴────────┘")
+            self.print_rotated_gear_layout()
+            return
             return
             
         # Create gear buttons 1-6 (no text, just colors)
@@ -320,7 +421,7 @@ class StreamDeckGT7:
     
     def switch_screen(self):
         """Switch to the next screen"""
-        screens = list(SCREEN_LAYOUTS.keys())
+        screens = list(self.screen_layouts.keys())
         current_index = screens.index(self.current_screen)
         next_index = (current_index + 1) % len(screens)
         self.current_screen = screens[next_index]
@@ -342,7 +443,7 @@ class StreamDeckGT7:
         try:
             # Find button ID for this type in current screen layout
             button_id = None
-            current_layout = SCREEN_LAYOUTS.get(self.current_screen, {})
+            current_layout = self.screen_layouts.get(self.current_screen, {})
             for bid, btype in current_layout.items():
                 if btype == button_type:
                     button_id = bid
@@ -451,7 +552,16 @@ class StreamDeckGT7:
             
             # Update each gear button (1-6)
             for gear_num in range(1, 7):
-                button_id = gear_num - 1  # buttons 0-5 for gears 1-6
+                # Find the correct button ID for this gear in the rotated layout
+                gear_button_name = f"gear{gear_num}"
+                button_id = None
+                for bid, btype in self.screen_layouts["gears"].items():
+                    if btype == gear_button_name:
+                        button_id = bid
+                        break
+                
+                if button_id is None:
+                    continue
                 
                 # Determine button color based on current state
                 if gear == gear_num:
@@ -762,10 +872,13 @@ def main():
                        help='Run in simulation mode without hardware')
     parser.add_argument('--brightness', type=int, default=50, choices=range(1, 101),
                        help='Set Stream Deck brightness (1-100, default: 50)')
+    parser.add_argument('--rotation', type=int, default=0, choices=[0, 90, 180, 270],
+                       help='Rotate Stream Deck display (0, 90, 180, 270 degrees, default: 0)')
     args = parser.parse_args()
     
     logger.info("Starting GT7 Stream Deck integration")
     logger.info(f"Stream Deck brightness: {args.brightness}%")
+    logger.info(f"Stream Deck rotation: {args.rotation}°")
     logger.info(f"Configured room lights: {ROOM_LIGHTS}")
     logger.info(f"Shift light entity: {HUE_LIGHT_ENTITY}")
     
@@ -774,7 +887,7 @@ def main():
     signal.signal(signal.SIGTERM, shutdown_handler)
     
     # Initialize Stream Deck
-    stream_deck_gt7 = StreamDeckGT7(simulate=args.simulate, brightness=args.brightness)
+    stream_deck_gt7 = StreamDeckGT7(simulate=args.simulate, brightness=args.brightness, rotation=args.rotation)
     
     # Initialize Stream Deck
     if not stream_deck_gt7.initialize_streamdeck():
