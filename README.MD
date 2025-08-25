@@ -12,14 +12,14 @@ A comprehensive lighting system for Gran Turismo 7 that provides multiple ways t
 ### 📱 Stream Deck Multi-Screen Dashboard (`streamdeck_gt7.py`) 🆕
 - **Physical button displays**: Real-time telemetry on Stream Deck Mini hardware (6 buttons, 3x2 layout)
 - **Multi-screen layouts**: Three switchable screens - Main telemetry view, Sequential gear display, and H-Pattern shifter layout
-- **Button press switching**: Press ANY button to cycle between screens seamlessly
+- **Dynamic button controls**: 🆕 Interactive buttons for brightness, screen cycling, and rotation adjustment during racing
 - **Main screen features**: Shift light, GT7's suggested gear, current gear, speed, RPM with progress bar, driving status
 - **Sequential gear screen features**: Visual gear indicators (buttons 1-6) with color coding for paddle shifters
-- **H-Pattern shifter screen features**: 🆕 Realistic H-shifter gate pattern layout matching real manual transmissions
+- **H-Pattern shifter screen features**: Realistic H-shifter gate pattern layout matching real manual transmissions
 - **Advanced telemetry**: GT7's built-in gear suggestions displayed in real-time
 - **Visual progress indicators**: RPM gauge with color-coded rev limit warnings
-- **Brightness control**: Adjustable brightness (1-100%) via command line
-- **Rotation support**: Mount at any angle (0°, 90°, 180°, 270°) with automatic layout adjustment
+- **Real-time brightness control**: Adjust display brightness (1-100%) with physical buttons during racing
+- **Live rotation adjustment**: Rotate display orientation (0°/90°/180°/270°) without restarting
 - **Complete automation**: Full room lighting and shift light integration
 - **Professional hardware setup**: Perfect for dedicated sim racing rigs
 
@@ -51,15 +51,16 @@ A comprehensive lighting system for Gran Turismo 7 that provides multiple ways t
 ### Stream Deck Multi-Screen Dashboard (`streamdeck_gt7.py`) 🆕
 1. **Physical Hardware Connection**: Connects to Stream Deck Mini (6 buttons in 3x2 layout)
 2. **Multi-Screen System**: Three dedicated screen layouts accessible via button press
-3. **Main Screen Layout**: [SHIFT][GT7][GEAR] / [SPEED][RPM][STATUS] - Complete telemetry overview
-4. **Sequential Gear Screen Layout**: [1][2][3] / [4][5][6] - Visual gear indicators in order (perfect for paddle shifters)
-5. **H-Pattern Shifter Screen Layout**: 🆕 [G1][G3][G5] / [G2][G4][G6] - Realistic H-shifter gate pattern
-6. **Real-time Updates**: Updates button displays at 10Hz with live telemetry data
-7. **GT7 Integration**: Shows GT7's native suggested gear recommendations
-8. **Visual Feedback**: Progress bars, color coding, and flashing indicators
-9. **Brightness Control**: Adjustable display brightness (1-100%)
-10. **Rotation Support**: Mount Stream Deck at any angle (0°, 90°, 180°, 270°) with automatic button layout adjustment
-11. **Complete Automation**: All room lighting and shift light features included
+3. **Dynamic Button Controls**: 🆕 Interactive hardware controls for brightness, rotation, and screen switching
+4. **Main Screen Layout**: [SHIFT][GT7][GEAR] / [SPEED][RPM][STATUS] - Complete telemetry overview
+5. **Sequential Gear Screen Layout**: [1][2][3] / [4][5][6] - Visual gear indicators in order (perfect for paddle shifters)
+6. **H-Pattern Shifter Screen Layout**: [G1][G3][G5] / [G2][G4][G6] - Realistic H-shifter gate pattern
+7. **Real-time Updates**: Updates button displays at 10Hz with live telemetry data
+8. **GT7 Integration**: Shows GT7's native suggested gear recommendations
+9. **Visual Feedback**: Progress bars, color coding, and flashing indicators
+10. **Live Brightness Control**: Adjust display brightness (1-100%) with physical buttons during racing
+11. **Dynamic Rotation**: Change display orientation (0°/90°/180°/270°) without restarting the application
+12. **Complete Automation**: All room lighting and shift light features included
 
 ### TUI Racing Dashboard (`drivetui.py`)
 1. **Terminal Interface**: Creates a professional racing dashboard in your terminal
@@ -204,10 +205,9 @@ python3 streamdeck_gt7.py --simulate --brightness 25 --rotation 270
 **Stream Deck Features:**
 - **Main Screen**: Complete telemetry overview with shift light, GT7 gear suggestions, current gear, speed, RPM progress bar, and status
 - **Sequential Gear Screen**: Visual gear display (buttons 1-6) in sequential order - perfect for paddle shifters with color coding (current gear in green, GT7 suggested gear in orange)
-- **H-Pattern Shifter Screen**: 🆕 Realistic H-shifter gate pattern [G1][G3][G5] / [G2][G4][G6] - matches real manual transmission layout
-- **Screen Switching**: Press ANY button to cycle between all three screens (Main → Sequential → H-Pattern → repeat)
-- **Brightness Control**: Adjust display brightness from 1-100% via command line
-- **Rotation Support**: Perfect mounting at any angle (0°, 90°, 180°, 270°) with automatic button layout adjustment
+- **H-Pattern Shifter Screen**: Realistic H-shifter gate pattern [G1][G3][G5] / [G2][G4][G6] - matches real manual transmission layout
+- **Dynamic Controls**: 🆕 Interactive button functions - brightness adjustment, screen cycling, and live rotation control
+- **Real-time Adjustments**: Change brightness (1-100%) and rotation (0°/90°/180°/270°) during racing without interruption
 - **Professional Setup**: Perfect for dedicated racing rigs and streaming setups
 
 You should see a real-time racing dashboard:
@@ -266,6 +266,36 @@ This layout mirrors the physical H-shifter gate in your car, making gear selecti
 - 🟠 **Orange**: GT7's suggested gear
 - 🔴 **Red**: Current gear flashing at rev limit
 - ⚫ **Dark**: Inactive gears
+
+### 🎮 Dynamic Button Controls 🆕
+
+The Stream Deck now features interactive button controls that work during racing:
+
+#### **Button Layout & Functions**
+```
+[🔆 +10%] [🔄 Cycle] [↻  90°]
+[🔅 -10%] [🔄 Cycle] [↺  90°]
+```
+
+- **🔆 Button 1**: Brightness +10% (increases from current level, max 100%)
+- **🔄 Button 2**: Cycle screens (Main → Sequential → H-Pattern → repeat)
+- **↻ Button 3**: Rotate display 90° clockwise (0° → 90° → 180° → 270° → 0°)
+- **🔅 Button 4**: Brightness -10% (decreases from current level, min 1%)
+- **🔄 Button 5**: Cycle screens (alternative button for screen switching)
+- **↺ Button 6**: Rotate display 90° counter-clockwise (0° → 270° → 180° → 90° → 0°)
+
+#### **Real-time Feedback**
+All button presses provide instant console feedback:
+- **Brightness**: `🔆 Brightness adjusted brighter: 50% → 60%`
+- **Rotation**: `🔄 Display rotated clockwise: 90° → 180°`
+- **Screen Switch**: `🔄 Switched to H-Pattern Shifter screen (use Button 2 or 5 to cycle)`
+
+#### **Smart Limits**
+- **Brightness**: Prevents going below 1% or above 100% with helpful messages
+- **Rotation**: Cycles through all four orientations (0°, 90°, 180°, 270°)
+- **Instant Updates**: All changes apply immediately without interrupting racing
+
+Perfect for adjusting your display on-the-fly based on lighting conditions, mounting position, or personal preferences during racing sessions!
 
 ### 5. Test in GT7
 

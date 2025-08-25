@@ -156,6 +156,15 @@ class StreamDeckGT7:
         # Create rotated button mappings based on rotation
         self.setup_rotated_layouts()
         
+        # Set initial brightness and show controls
+        if self.deck:
+            self.deck.set_brightness(self.brightness)
+        
+        print(f"✅ Stream Deck initialized - Brightness: {self.brightness}%, Rotation: {self.rotation}°")
+        print("🎮 Dynamic Button Controls:")
+        print("   Button 1: Brightness +10%    Button 4: Brightness -10%")
+        print("   Button 2/5: Cycle screens     Button 3: Rotate ↻   Button 6: Rotate ↺")
+        
     def setup_rotated_layouts(self):
         """Create button layouts adjusted for rotation"""
         # Original layouts (0 degrees)
@@ -522,9 +531,63 @@ class StreamDeckGT7:
                 self.deck.set_key_image(button_id, native_image)
     
     def button_callback(self, deck, key, state):
-        """Handle button press events - any button press switches screens"""
+        """Handle button press events with dynamic controls"""
         if state:  # Only handle button press (not release)
-            self.switch_screen()
+            if key == 0:  # Button 1 - Brightness up
+                self.adjust_brightness(+10)
+            elif key == 1 or key == 4:  # Button 2 or 5 - Screen cycling
+                self.switch_screen()
+            elif key == 2:  # Button 3 - Rotate clockwise
+                self.rotate_display(90)
+            elif key == 3:  # Button 4 - Brightness down
+                self.adjust_brightness(-10)
+            elif key == 5:  # Button 6 - Rotate counterclockwise
+                self.rotate_display(-90)
+    
+    def adjust_brightness(self, change):
+        """Adjust Stream Deck brightness by specified amount"""
+        old_brightness = self.brightness
+        self.brightness = max(1, min(100, self.brightness + change))
+        
+        if self.brightness != old_brightness:
+            if self.deck:
+                # Convert to 0-100 scale that Stream Deck expects
+                self.deck.set_brightness(self.brightness)
+            
+            direction = "brighter" if change > 0 else "dimmer"
+            print(f"🔆 Brightness adjusted {direction}: {old_brightness}% → {self.brightness}%")
+        else:
+            limit = "maximum" if change > 0 else "minimum"
+            print(f"⚠️ Already at {limit} brightness ({self.brightness}%)")
+    
+    def rotate_display(self, degrees):
+        """Rotate display by specified degrees (90 or -90)"""
+        global current_telemetry
+        
+        old_rotation = self.rotation
+        
+        if degrees > 0:
+            # Clockwise rotation
+            new_rotation = (self.rotation + 90) % 360
+            direction = "clockwise"
+        else:
+            # Counter-clockwise rotation
+            new_rotation = (self.rotation - 90) % 360
+            direction = "counter-clockwise"
+        
+        self.rotation = new_rotation
+        
+        # Recreate layouts with new rotation
+        self.setup_rotated_layouts()
+        
+        print(f"🔄 Display rotated {direction}: {old_rotation}° → {self.rotation}°")
+        
+        # Recreate the current screen with new rotation
+        self.create_initial_buttons()
+        
+        # Update display if we have telemetry data
+        if current_telemetry is not None:
+            self.update_telemetry_display()
     
     def switch_screen(self):
         """Switch to the next screen"""
@@ -540,7 +603,7 @@ class StreamDeckGT7:
             "h_shifter": "H-Pattern Shifter"
         }
         screen_display_name = screen_names.get(self.current_screen, self.current_screen)
-        print(f"🔄 Switching to {screen_display_name} screen")
+        print(f"🔄 Switched to {screen_display_name} screen (use Button 2 or 5 to cycle)")
         
         # Recreate the screen layout
         self.create_initial_buttons()
