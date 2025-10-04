@@ -11,11 +11,13 @@ A comprehensive lighting system for Gran Turismo 7 that provides multiple ways t
 
 ### 📱 Stream Deck Multi-Screen Dashboard (`streamdeck_gt7.py`) 🆕
 - **Physical button displays**: Real-time telemetry on Stream Deck Mini hardware (6 buttons, 3x2 layout)
-- **Multi-screen layouts**: Three switchable screens - Main telemetry view, Sequential gear display, and H-Pattern shifter layout
-- **Dynamic button controls**: 🆕 Interactive buttons for brightness, screen cycling, and rotation adjustment during racing
+- **Multi-screen layouts**: Four switchable screens - Main telemetry, Sequential gears, H-Pattern shifter, and 🆕 **Endurance racing**
+- **🏁 NEW: Endurance Racing Screen**: Purpose-built for long-distance racing with tire temperature monitoring, fuel management, and lap tracking
+- **Dynamic button controls**: Interactive buttons for brightness, screen cycling, and rotation adjustment during racing
 - **Main screen features**: Shift light, GT7's suggested gear, current gear, speed, RPM with progress bar, driving status
 - **Sequential gear screen features**: Visual gear indicators (buttons 1-6) with color coding for paddle shifters
 - **H-Pattern shifter screen features**: Realistic H-shifter gate pattern layout matching real manual transmissions
+- **🔥 Endurance screen features**: Large 28pt tire temperatures (FL/FR/RL/RR), fuel percentage, lap counter with color-coded alerts
 - **Advanced telemetry**: GT7's built-in gear suggestions displayed in real-time
 - **Visual progress indicators**: RPM gauge with color-coded rev limit warnings
 - **Real-time brightness control**: Adjust display brightness (1-100%) with physical buttons during racing
@@ -249,6 +251,13 @@ Complete racing overview with all essential telemetry data.
 ```
 Gears displayed in sequential order - ideal for paddle shifter setups and modern race cars.
 
+#### **Endurance Racing Screen** 🆕 (Perfect for Long Races)
+```
+[FL 80°C] [FR 82°C] [FUEL 75%]
+[RL 78°C] [RR 81°C] [LAP 1/10]
+```
+Essential endurance racing data with color-coded tire temperatures, fuel percentage, and lap progress.
+
 #### **H-Pattern Shifter Screen** 🆕 (Perfect for Manual Transmissions)
 ```
 [G1] [G3] [G5]
@@ -311,6 +320,38 @@ The TUI dashboard shows:
 - **Fuel Bar**: Green when full, red when low (placeholder for now)
 - **Live Stats**: Current gear, throttle %, brake %, shift light status
 - **Room Status**: Shows when driving mode is active (lights off)
+
+### 6. Endurance Racing Setup 🆕
+
+For long-distance racing with fuel and tire management:
+
+```bash
+# Run the endurance-focused TUI
+python3 endurance_tui.py
+```
+
+The **Endurance TUI** shows everything above PLUS:
+- **Real Fuel Monitoring**: Live fuel percentage, consumption rate, remaining time
+- **Tire Temperature Alerts**: Critical temp warnings (🔥 > 110°C, ⚠️ > 100°C)  
+- **Engine Temperature**: Coolant and oil temperature monitoring
+- **Pit Strategy Data**: Fuel consumption rates and pit window calculations
+- **Endurance Alerts**: Critical warnings for fuel, tire temps, and engine heat
+
+**Available Endurance Data:**
+- `fuel_level` / `fuel_capacity`: Real fuel monitoring
+- `tire_fl_temp`, `tire_fr_temp`, etc.: All four tire temperatures
+- `water_temp` / `oil_temp`: Engine temperature monitoring
+- `tire_fl_sus_height`, etc.: Tire wear indicators (suspension height changes)
+
+**Stream Deck Endurance Screen Features:**
+- **Large 28pt font numbers** for maximum readability during long races
+- **No unit clutter** (removed °C and %) to maximize number size  
+- **Color-coded tire temps**: 🟢 ≤100°C (optimal), 🟡 >100°C (warm), 🟠 >110°C (hot), 🔴 >120°C (critical)
+- **Color-coded fuel level**: 🟢 ≥30% (good), 🟡 <30% (plan pit), 🟠 <20% (low), 🔴 <10% (pit now!)
+- **Lap counter**: Shows current/total laps (e.g., "8/25") or just current lap
+- **Clean, high-contrast display** optimized for quick glances during racing
+
+See `ENDURANCE_TELEMETRY.md` for complete reference of all 20+ endurance racing data points!
 
 ## 📋 Configuration Options
 
@@ -476,11 +517,33 @@ Change the RGB color in `hueflash.py`:
 ### Telemetry Data
 
 The script uses the `gt-telem` library to receive UDP telemetry from GT7 at 60Hz. Key data points:
-- `rev_limit`: Boolean flag when engine hits rev limiter (used by both scripts)
-- `engine_rpm`: Current engine RPM (used for race detection)
-- `speed_kph`: Current speed (used for race detection)
-- `position_x/y/z`: Car position coordinates (used by `drive.py` for pause detection)
-- `time_of_day_ms`: Game time (used by `drive.py` for pause detection)
+
+**Basic Racing Data:**
+- `rev_limit`: Boolean flag when engine hits rev limiter (shift light trigger)
+- `engine_rpm`: Current engine RPM (race detection, shift points)
+- `speed_kph`: Current speed (race detection, performance monitoring)
+- `current_gear`: Current gear selection
+- `suggested_gear`: GT7's recommended gear
+- `throttle` / `brake`: Input percentages
+
+**Endurance Racing Data:**
+- `fuel_level`: Current fuel level (liters/units)
+- `fuel_capacity`: Maximum fuel tank capacity  
+- `tire_fl_temp` / `tire_fr_temp` / `tire_rl_temp` / `tire_rr_temp`: Tire temperatures (°C)
+- `tire_fl_sus_height` / etc.: Suspension heights (tire wear indicators)
+- `water_temp`: Engine coolant temperature (°C)
+- `oil_temp`: Engine oil temperature (°C)
+- `oil_pressure`: Engine oil pressure
+- `boost_pressure`: Turbo boost pressure (kPa)
+
+**Race Progress Data:**
+- `current_lap` / `total_laps`: Lap counters
+- `best_lap_time` / `last_lap_time`: Lap time tracking (milliseconds)
+- `race_time`: Total race time elapsed
+- `position_x/y/z`: Car position coordinates (pause detection)
+- `time_of_day_ms`: Game time (pause detection)
+
+See `ENDURANCE_TELEMETRY.md` for complete endurance racing data reference.
 
 ### Advanced Pause Detection (`drive.py`) 🆕
 
