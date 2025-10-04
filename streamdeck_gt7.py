@@ -44,6 +44,10 @@ Screen Layouts:
     Gear Screen:
     [  1  ] [ 2  ] [ 3  ]
     [  4  ] [ 5  ] [ 6  ]
+    
+    Endurance Screen:
+    [FL 80°C] [FR 82°C] [FUEL 75%]
+    [RL 78°C] [RR 81°C] [LAP 1/10]
 """
 
 import os
@@ -196,11 +200,22 @@ class StreamDeckGT7:
             5: "gear6"         # Button 6: Gear 6
         }
         
+        # Endurance racing layout (4th screen) - tire temps, fuel, lap data
+        original_endurance = {
+            0: "tire_fl",      # Position 1: Front Left tire temp
+            1: "tire_fr",      # Position 2: Front Right tire temp  
+            2: "fuel",         # Position 3: Fuel %
+            3: "tire_rl",      # Position 4: Rear Left tire temp
+            4: "tire_rr",      # Position 5: Rear Right tire temp
+            5: "lap_status"    # Position 6: Current lap status
+        }
+        
         # Apply rotation mapping
         if self.rotation == 0:
             self.rotated_main = original_main
             self.rotated_gears = original_gears
             self.rotated_h_shifter = original_h_shifter
+            self.rotated_endurance = original_endurance
         elif self.rotation == 90:  # 90° clockwise
             # Custom button mapping with gear3 and gear4 swapped
             # 0->2, 1->5, 2->1, 3->4, 4->0, 5->3
@@ -208,6 +223,7 @@ class StreamDeckGT7:
             self.rotated_main = {rotation_map[k]: v for k, v in original_main.items()}
             self.rotated_gears = {rotation_map[k]: v for k, v in original_gears.items()}
             self.rotated_h_shifter = {rotation_map[k]: v for k, v in original_h_shifter.items()}
+            self.rotated_endurance = {rotation_map[k]: v for k, v in original_endurance.items()}
         elif self.rotation == 180:  # 180° rotation
             # Button mapping for 180° rotation: [0,1,2] -> [5,4,3]
             #                                    [3,4,5] -> [2,1,0]
@@ -215,18 +231,21 @@ class StreamDeckGT7:
             self.rotated_main = {rotation_map[k]: v for k, v in original_main.items()}
             self.rotated_gears = {rotation_map[k]: v for k, v in original_gears.items()}
             self.rotated_h_shifter = {rotation_map[k]: v for k, v in original_h_shifter.items()}
+            self.rotated_endurance = {rotation_map[k]: v for k, v in original_endurance.items()}
         elif self.rotation == 270:  # 270° clockwise (90° counter-clockwise)
             # Correct mapping: G1->4, G2->1, G3->5, G4->2, G5->6, G6->3
             rotation_map = {0: 3, 1: 0, 2: 4, 3: 1, 4: 5, 5: 2}
             self.rotated_main = {rotation_map[k]: v for k, v in original_main.items()}
             self.rotated_gears = {rotation_map[k]: v for k, v in original_gears.items()}
             self.rotated_h_shifter = {rotation_map[k]: v for k, v in original_h_shifter.items()}
+            self.rotated_endurance = {rotation_map[k]: v for k, v in original_endurance.items()}
         
         # Store the current layouts
         self.screen_layouts = {
             "main": self.rotated_main,
             "gears": self.rotated_gears,
-            "h_shifter": self.rotated_h_shifter
+            "h_shifter": self.rotated_h_shifter,
+            "endurance": self.rotated_endurance
         }
     
     def print_rotated_main_layout(self):
@@ -297,6 +316,38 @@ class StreamDeckGT7:
         print("├────────┼────────┼────────┤")
         print(f"│   {grid[3]}    │   {grid[4]}    │   {grid[5]}    │")
         print("│        │        │        │")
+        print("└────────┴────────┴────────┘")
+        if self.rotation != 0:
+            print(f"   (Rotated {self.rotation}°)")
+    
+    def print_rotated_endurance_layout(self):
+        """Print the endurance screen layout adjusted for rotation"""
+        layout = self.screen_layouts["endurance"]
+        
+        # Create a mapping of button positions to labels
+        labels = {
+            "tire_fl": "TIRE FL", "tire_fr": "TIRE FR", "fuel": "FUEL %",
+            "tire_rl": "TIRE RL", "tire_rr": "TIRE RR", "lap_status": "LAP INFO"
+        }
+        values = {
+            "tire_fl": "80°C", "tire_fr": "82°C", "fuel": "75%",
+            "tire_rl": "78°C", "tire_rr": "81°C", "lap_status": "1/10"
+        }
+        
+        # Create 3x2 grid based on rotated layout
+        grid_labels = [""] * 6
+        grid_values = [""] * 6
+        
+        for button_id, button_type in layout.items():
+            grid_labels[button_id] = labels.get(button_type, "")
+            grid_values[button_id] = values.get(button_type, "")
+        
+        print("┌────────┬────────┬────────┐")
+        print(f"│{grid_labels[0]:^8}│{grid_labels[1]:^8}│{grid_labels[2]:^8}│")
+        print(f"│{grid_values[0]:^8}│{grid_values[1]:^8}│{grid_values[2]:^8}│")
+        print("├────────┼────────┼────────┤")
+        print(f"│{grid_labels[3]:^8}│{grid_labels[4]:^8}│{grid_labels[5]:^8}│")
+        print(f"│{grid_values[3]:^8}│{grid_values[4]:^8}│{grid_values[5]:^8}│")
         print("└────────┴────────┴────────┘")
         if self.rotation != 0:
             print(f"   (Rotated {self.rotation}°)")
@@ -410,6 +461,44 @@ class StreamDeckGT7:
         
         return image
     
+    def create_endurance_button_image(self, text, value="", color=(255, 255, 255), bg_color=(0, 0, 0)):
+        """Create a button image optimized for endurance data with large, readable text"""
+        # Stream Deck Mini buttons are 80x80 pixels
+        image = Image.new('RGB', (80, 80), bg_color)
+        draw = ImageDraw.Draw(image)
+        
+        # Use much larger fonts for endurance data (no units = more space!)
+        try:
+            font_title = ImageFont.truetype("/System/Library/Fonts/Arial.ttf", 11)  # Title slightly smaller
+            font_value = ImageFont.truetype("/System/Library/Fonts/Arial.ttf", 28)  # Value even larger without units!
+        except:
+            font_title = ImageFont.load_default()
+            font_value = ImageFont.load_default()
+        
+        # Draw small title at top
+        if text:
+            text_bbox = draw.textbbox((0, 0), text, font=font_title)
+            text_width = text_bbox[2] - text_bbox[0]
+            text_x = (80 - text_width) // 2
+            # Position title higher and make it dimmer
+            title_color = (int(color[0] * 0.7), int(color[1] * 0.7), int(color[2] * 0.7))
+            draw.text((text_x, 2), text, font=font_title, fill=title_color)
+        
+        # Draw large value in center - this is the main focus!
+        if value:
+            value_bbox = draw.textbbox((0, 0), str(value), font=font_value)
+            value_width = value_bbox[2] - value_bbox[0]
+            value_height = value_bbox[3] - value_bbox[1]
+            value_x = (80 - value_width) // 2
+            value_y = (80 - value_height) // 2 + 5  # Slightly below center
+            draw.text((value_x, value_y), str(value), font=font_value, fill=color)
+        
+        # Apply rotation if specified
+        if self.rotation != 0:
+            image = image.rotate(-self.rotation, expand=False)
+        
+        return image
+    
     def create_initial_buttons(self):
         """Create initial button layout for current screen"""
         if self.current_screen == "main":
@@ -418,6 +507,8 @@ class StreamDeckGT7:
             self.create_gear_screen()
         elif self.current_screen == "h_shifter":
             self.create_h_shifter_screen()
+        elif self.current_screen == "endurance":
+            self.create_endurance_screen()
     
     def create_main_screen(self):
         """Create the main telemetry screen"""
@@ -475,6 +566,29 @@ class StreamDeckGT7:
                 native_image = PILHelper.to_native_format(self.deck, image)
                 self.deck.set_key_image(button_id, native_image)
 
+    def create_endurance_screen(self):
+        """Create the endurance racing screen with tire temps, fuel, and lap data"""
+        if self.simulate:
+            print("🔄 Initializing Endurance Screen...")
+            self.print_rotated_endurance_layout()
+            return
+            
+        buttons = {
+            "tire_fl": self.create_endurance_button_image("FL", "80", color=(0, 255, 0)),
+            "tire_fr": self.create_endurance_button_image("FR", "82", color=(0, 255, 0)),
+            "fuel": self.create_endurance_button_image("FUEL", "75", color=(0, 255, 0)),
+            "tire_rl": self.create_endurance_button_image("RL", "78", color=(0, 255, 0)),
+            "tire_rr": self.create_endurance_button_image("RR", "81", color=(0, 255, 0)),
+            "lap_status": self.create_endurance_button_image("LAP", "1/10", color=(255, 255, 255))
+        }
+        
+        layout = self.screen_layouts["endurance"]
+        for button_id, button_type in layout.items():
+            if button_type in buttons:
+                # Convert PIL image to Stream Deck format
+                image = PILHelper.to_native_format(self.deck, buttons[button_type])
+                self.deck.set_key_image(button_id, image)
+
     def update_h_shifter_screen_telemetry(self):
         """Update H-shifter screen with telemetry data"""
         global current_telemetry, shift_light_active
@@ -529,6 +643,92 @@ class StreamDeckGT7:
             if self.deck:
                 native_image = PILHelper.to_native_format(self.deck, image)
                 self.deck.set_key_image(button_id, native_image)
+
+    def update_endurance_screen_telemetry(self):
+        """Update endurance screen with tire temps, fuel, and lap data"""
+        global current_telemetry, shift_light_active
+        
+        if not current_telemetry:
+            return
+            
+        if self.simulate:
+            return
+            
+        # Get telemetry values
+        tire_fl_temp = getattr(current_telemetry, 'tire_fl_temp', 0)
+        tire_fr_temp = getattr(current_telemetry, 'tire_fr_temp', 0)
+        tire_rl_temp = getattr(current_telemetry, 'tire_rl_temp', 0)
+        tire_rr_temp = getattr(current_telemetry, 'tire_rr_temp', 0)
+        
+        fuel_level = getattr(current_telemetry, 'fuel_level', 0)
+        fuel_capacity = getattr(current_telemetry, 'fuel_capacity', 100)
+        fuel_percentage = (fuel_level / fuel_capacity) * 100 if fuel_capacity > 0 else 0
+        
+        current_lap = getattr(current_telemetry, 'current_lap', 0)
+        total_laps = getattr(current_telemetry, 'total_laps', 0)
+        
+
+        
+        # Helper function to get tire color based on temperature
+        def get_tire_color(temp):
+            if temp == 0:
+                return (255, 255, 255)  # White for no data
+            elif temp > 120:
+                return (255, 0, 0)      # Critical red >120°C
+            elif temp > 110:
+                return (255, 165, 0)    # Hot orange >110°C  
+            elif temp > 100:
+                return (255, 255, 0)    # Warm yellow >100°C
+            else:
+                return (0, 255, 0)      # Optimal green ≤100°C
+        
+
+        
+        # Helper function to get fuel color
+        def get_fuel_color(percentage):
+            if percentage < 10:
+                return (255, 0, 0)      # Critical red <10%
+            elif percentage < 20:
+                return (255, 100, 0)    # Low orange <20%
+            elif percentage < 30:
+                return (255, 255, 0)    # Warning yellow <30%
+            else:
+                return (0, 255, 0)      # Good green ≥30%
+        
+        # Update buttons based on layout
+        layout = self.screen_layouts["endurance"]
+        
+        for button_id, button_type in layout.items():
+            if button_type == "tire_fl":
+                color = get_tire_color(tire_fl_temp)
+                self.update_button_by_id(button_id, "FL", f"{tire_fl_temp:.0f}" if tire_fl_temp > 0 else "N/A", color)
+            elif button_type == "tire_fr":
+                color = get_tire_color(tire_fr_temp)
+                self.update_button_by_id(button_id, "FR", f"{tire_fr_temp:.0f}" if tire_fr_temp > 0 else "N/A", color)
+            elif button_type == "tire_rl":
+                color = get_tire_color(tire_rl_temp)
+                self.update_button_by_id(button_id, "RL", f"{tire_rl_temp:.0f}" if tire_rl_temp > 0 else "N/A", color)
+            elif button_type == "tire_rr":
+                color = get_tire_color(tire_rr_temp)
+                self.update_button_by_id(button_id, "RR", f"{tire_rr_temp:.0f}" if tire_rr_temp > 0 else "N/A", color)
+            elif button_type == "fuel":
+                color = get_fuel_color(fuel_percentage)
+                self.update_button_by_id(button_id, "FUEL", f"{fuel_percentage:.0f}" if fuel_capacity > 0 else "N/A", color)
+            elif button_type == "lap_status":
+                if total_laps > 0:
+                    lap_text = f"{current_lap}/{total_laps}"
+                else:
+                    lap_text = f"L{current_lap}" if current_lap > 0 else "N/A"
+                self.update_button_by_id(button_id, "LAP", lap_text, (255, 255, 255))
+
+    def update_button_by_id(self, button_id, title, value, color):
+        """Helper function to update a button by its ID"""
+        if self.deck:
+            image = self.create_endurance_button_image(title, value, color)
+            native_image = PILHelper.to_native_format(self.deck, image)
+            self.deck.set_key_image(button_id, native_image)
+    
+
     
     def button_callback(self, deck, key, state):
         """Handle button press events with dynamic controls"""
@@ -600,7 +800,8 @@ class StreamDeckGT7:
         screen_names = {
             "main": "Main Telemetry",
             "gears": "Sequential Gears", 
-            "h_shifter": "H-Pattern Shifter"
+            "h_shifter": "H-Pattern Shifter",
+            "endurance": "Endurance Racing"
         }
         screen_display_name = screen_names.get(self.current_screen, self.current_screen)
         print(f"🔄 Switched to {screen_display_name} screen (use Button 2 or 5 to cycle)")
@@ -652,6 +853,8 @@ class StreamDeckGT7:
             self.update_gear_screen_telemetry()
         elif self.current_screen == "h_shifter":
             self.update_h_shifter_screen_telemetry()
+        elif self.current_screen == "endurance":
+            self.update_endurance_screen_telemetry()
     
     def update_main_screen_telemetry(self):
         """Update main screen with telemetry data"""
